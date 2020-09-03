@@ -501,57 +501,6 @@ var formatAMPM = function formatAMPM(date) {
         }
     }
     return script;
-}const isOldIE = typeof navigator !== 'undefined' &&
-    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
-function createInjector(context) {
-    return (id, style) => addStyle(id, style);
-}
-let HEAD;
-const styles = {};
-function addStyle(id, css) {
-    const group = isOldIE ? css.media || 'default' : id;
-    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
-    if (!style.ids.has(id)) {
-        style.ids.add(id);
-        let code = css.source;
-        if (css.map) {
-            // https://developer.chrome.com/devtools/docs/javascript-debugging
-            // this makes source maps inside style tags work properly in Chrome
-            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
-            // http://stackoverflow.com/a/26603875
-            code +=
-                '\n/*# sourceMappingURL=data:application/json;base64,' +
-                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
-                    ' */';
-        }
-        if (!style.element) {
-            style.element = document.createElement('style');
-            style.element.type = 'text/css';
-            if (css.media)
-                style.element.setAttribute('media', css.media);
-            if (HEAD === undefined) {
-                HEAD = document.head || document.getElementsByTagName('head')[0];
-            }
-            HEAD.appendChild(style.element);
-        }
-        if ('styleSheet' in style.element) {
-            style.styles.push(code);
-            style.element.styleSheet.cssText = style.styles
-                .filter(Boolean)
-                .join('\n');
-        }
-        else {
-            const index = style.ids.size - 1;
-            const textNode = document.createTextNode(code);
-            const nodes = style.element.childNodes;
-            if (nodes[index])
-                style.element.removeChild(nodes[index]);
-            if (nodes.length)
-                style.element.insertBefore(textNode, nodes[index]);
-            else
-                style.element.appendChild(textNode);
-        }
-    }
 }/* script */
 var __vue_script__ = script;
 /* template */
@@ -819,24 +768,18 @@ var __vue_render__ = function __vue_render__() {
 var __vue_staticRenderFns__ = [];
 /* style */
 
-var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
-  if (!inject) return;
-  inject("data-v-a416bbd0_0", {
-    source: "*[data-v-a416bbd0]{box-sizing:border-box}.kalendar-wrapper[data-v-a416bbd0]{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\";min-height:1440px;--main-color:#ec4d3d;--weekend-color:#f7f7f7;--current-day-color:#fef4f4;--table-cell-border-color:#e5e5e5;--odd-cell-border-color:#e5e5e5;--hour-row-color:inherit;--dark:#212121;--lightg:#9e9e9e;--card-bgcolor:#4285f4;--card-color:white;--max-hours:10;--previous-events:#c6dafc;--previous-text-color:#727d8f}.kalendar-wrapper.gstyle[data-v-a416bbd0]{--hour-row-color:#212121;--main-color:#4285f4;--weekend-color:transparent;--current-day-color:transparent;--table-cell-border-color:#e0e0e0;--odd-cell-border-color:transparent;font-family:\"Google Sans\",Roboto,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Arial,sans-serif}.kalendar-wrapper.gstyle .week-navigator[data-v-a416bbd0]{background:#fff;border-bottom:none;padding:20px;color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .week-navigator button[data-v-a416bbd0]{color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .created-event[data-v-a416bbd0],.kalendar-wrapper.gstyle .creating-event[data-v-a416bbd0]{background-color:var(--card-bgcolor);color:var(--card-color);text-shadow:none;border-left:none;border-radius:2px;opacity:1;border-bottom:solid 1px rgba(0,0,0,.03)}.kalendar-wrapper.gstyle .created-event>*[data-v-a416bbd0],.kalendar-wrapper.gstyle .creating-event>*[data-v-a416bbd0]{text-shadow:none}.kalendar-wrapper.gstyle .is-past .created-event[data-v-a416bbd0],.kalendar-wrapper.gstyle .is-past .creating-event[data-v-a416bbd0]{background-color:var(--previous-events);color:var(--previous-text-color)}.kalendar-wrapper.gstyle .created-event[data-v-a416bbd0]{width:96%}.kalendar-wrapper.gstyle .created-event .time[data-v-a416bbd0]{right:2px}.kalendar-wrapper.gstyle .sticky-top .days[data-v-a416bbd0]{margin-left:0;padding-left:55px}.kalendar-wrapper.gstyle .all-day[data-v-a416bbd0]{display:none}.kalendar-wrapper.gstyle ul.building-blocks.day-1 li.is-an-hour[data-v-a416bbd0]::before{content:\"\";position:absolute;bottom:-1px;left:-10px;width:10px;height:1px;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours[data-v-a416bbd0],.kalendar-wrapper.gstyle ul.building-blocks li[data-v-a416bbd0]{border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours li[data-v-a416bbd0]{font-size:80%}.kalendar-wrapper.gstyle .hour-indicator-line>span.line[data-v-a416bbd0]{height:2px;background-color:#db4437}.kalendar-wrapper.gstyle .hour-indicator-line>span.line[data-v-a416bbd0]:before{content:\"\";width:12px;height:12px;display:block;background-color:#db4437;position:absolute;top:-1px;left:0;border-radius:100%}.kalendar-wrapper.gstyle .days[data-v-a416bbd0]{border-top:solid 1px var(--table-cell-border-color);position:relative}.kalendar-wrapper.gstyle .days[data-v-a416bbd0]:before{content:\"\";position:absolute;height:1px;width:55px;left:0;bottom:0;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator[data-v-a416bbd0]{display:flex;flex-direction:column;align-items:center;color:var(--dark);font-size:13px;padding-left:0;border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator>div[data-v-a416bbd0]{display:flex;flex-direction:column;align-items:center}.kalendar-wrapper.gstyle .day-indicator.is-before[data-v-a416bbd0]{color:#757575}.kalendar-wrapper.gstyle .day-indicator .number-date[data-v-a416bbd0]{margin-left:0;margin-right:0;order:2;font-size:25px;font-weight:500;width:46px;height:46px;border-radius:100%;align-items:center;justify-content:center;display:flex;margin-top:4px}.kalendar-wrapper.gstyle .day-indicator.today[data-v-a416bbd0]{border-bottom-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator.today[data-v-a416bbd0]:after{display:none}.kalendar-wrapper.gstyle .day-indicator.today .number-date[data-v-a416bbd0]{background-color:var(--main-color);color:#fff}.kalendar-wrapper.gstyle .day-indicator .letters-date[data-v-a416bbd0]{margin-left:0;margin-right:0;font-weight:500;text-transform:uppercase;font-size:11px}.kalendar-wrapper.gstyle .day-indicator[data-v-a416bbd0]:first-child{position:relative}.kalendar-wrapper.gstyle .day-indicator[data-v-a416bbd0]:first-child::before{content:\"\";position:absolute;left:-1px;top:0;width:1px;height:100%;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .creating-event[data-v-a416bbd0],.kalendar-wrapper.gstyle .popup-wrapper[data-v-a416bbd0]{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.kalendar-wrapper.non-desktop .building-blocks[data-v-a416bbd0]{pointer-events:none}.kalendar-wrapper.day-view .day-indicator[data-v-a416bbd0]{align-items:flex-start;text-align:center;padding-left:10px}.created-event[data-v-a416bbd0],.creating-event[data-v-a416bbd0]{padding:4px 6px;cursor:default;word-break:break-word;height:100%;width:100%;font-size:14px}.created-event h4[data-v-a416bbd0],.creating-event h4[data-v-a416bbd0]{font-weight:400}.creating-event[data-v-a416bbd0]{background-color:#34aadc;opacity:.9}.creating-event>*[data-v-a416bbd0]{text-shadow:0 0 7px rgba(0,0,0,.25)}.created-event[data-v-a416bbd0]{background-color:#bfecff;opacity:.74;border-left:solid 3px #34aadc;color:#1f6570}.week-navigator[data-v-a416bbd0]{display:flex;align-items:center;background:linear-gradient(#fdfdfd,#f9f9f9);border-bottom:solid 1px #ec4d3d;padding:10px 20px}.week-navigator .nav-wrapper[data-v-a416bbd0]{display:flex;align-items:center;justify-content:space-between;font-size:22px;width:25ch;max-width:30ch;margin:0 auto}.week-navigator .nav-wrapper span[data-v-a416bbd0]{white-space:nowrap}.week-navigator button[data-v-a416bbd0]{background:0 0;border:none;padding:0;display:inline-flex;margin:0 10px;color:#ec4d3d;align-items:center;font-size:14px;padding-bottom:5px}.kalendar-wrapper[data-v-a416bbd0]{background-color:#fff;min-width:300px}.no-scroll[data-v-a416bbd0]{overflow-y:hidden;max-height:100%}.hour-indicator-line[data-v-a416bbd0]{position:absolute;z-index:2;width:100%;height:10px;display:flex;align-items:center;pointer-events:none;user-select:none}.hour-indicator-line>span.line[data-v-a416bbd0]{background-color:var(--main-color);height:1px;display:block;flex:1}.hour-indicator-line>span.time-value[data-v-a416bbd0]{font-size:14px;width:48px;color:var(--main-color);font-weight:600;background-color:#fff}.hour-indicator-tooltip[data-v-a416bbd0]{position:absolute;z-index:0;background-color:var(--main-color);width:10px;height:10px;display:block;border-radius:100%;pointer-events:none;user-select:none}ul.kalendar-day li.kalendar-cell[data-v-a416bbd0]:last-child{display:none}.week-navigator-button[data-v-a416bbd0]{outline:0}.week-navigator-button:active svg[data-v-a416bbd0],.week-navigator-button:hover svg[data-v-a416bbd0]{stroke:var(--main-color)}",
-    map: undefined,
-    media: undefined
-  });
-};
+var __vue_inject_styles__ = undefined;
 /* scoped */
 
-
-var __vue_scope_id__ = "data-v-a416bbd0";
+var __vue_scope_id__ = undefined;
 /* module identifier */
 
 var __vue_module_identifier__ = undefined;
 /* functional template */
 
 var __vue_is_functional_template__ = false;
+/* style inject */
+
 /* style inject SSR */
 
 /* style inject shadow dom */
@@ -844,7 +787,7 @@ var __vue_is_functional_template__ = false;
 var __vue_component__ = /*#__PURE__*/normalizeComponent({
   render: __vue_render__,
   staticRenderFns: __vue_staticRenderFns__
-}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, createInjector, undefined, undefined);/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Kalendar: __vue_component__});var install = function installKalendarVue(Vue) {
+}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Kalendar: __vue_component__});var install = function installKalendarVue(Vue) {
   if (install.installed) return;
   install.installed = true;
   Object.entries(components).forEach(function (_ref) {
@@ -1339,7 +1282,58 @@ var myWorker = {
       }, 500);
     }
   }
-};/* script */
+};const isOldIE = typeof navigator !== 'undefined' &&
+    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+function createInjector(context) {
+    return (id, style) => addStyle(id, style);
+}
+let HEAD;
+const styles = {};
+function addStyle(id, css) {
+    const group = isOldIE ? css.media || 'default' : id;
+    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
+    if (!style.ids.has(id)) {
+        style.ids.add(id);
+        let code = css.source;
+        if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+                '\n/*# sourceMappingURL=data:application/json;base64,' +
+                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+                    ' */';
+        }
+        if (!style.element) {
+            style.element = document.createElement('style');
+            style.element.type = 'text/css';
+            if (css.media)
+                style.element.setAttribute('media', css.media);
+            if (HEAD === undefined) {
+                HEAD = document.head || document.getElementsByTagName('head')[0];
+            }
+            HEAD.appendChild(style.element);
+        }
+        if ('styleSheet' in style.element) {
+            style.styles.push(code);
+            style.element.styleSheet.cssText = style.styles
+                .filter(Boolean)
+                .join('\n');
+        }
+        else {
+            const index = style.ids.size - 1;
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index])
+                style.element.removeChild(nodes[index]);
+            if (nodes.length)
+                style.element.insertBefore(textNode, nodes[index]);
+            else
+                style.element.appendChild(textNode);
+        }
+    }
+}/* script */
 var __vue_script__$1 = script$1;
 /* template */
 

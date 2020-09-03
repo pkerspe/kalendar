@@ -1,12 +1,13 @@
-import { g as getLocaleTime, c as cloneObject, b as _objectSpread2, d as __vue_normalize__, e as __vue_create_injector__ } from './index-82de4a1d.js';
+import { g as getLocaleTime, c as cloneObject, b as _objectSpread2, d as __vue_normalize__ } from './index-1d9e2343.js';
 import 'vue';
+import { a as __vue_create_injector__ } from './kalendar-weekview-b2424cb7.js';
 
 var script = {
   props: ['creator', 'index', 'cellData', 'constructedEvents', 'temporaryEvent'],
   inject: ['kalendar_options'],
   components: {
     KalendarEvent: function KalendarEvent() {
-      return import('./kalendar-event-1b1eaa32.js');
+      return import('./kalendar-event-a132ce8f.js');
     }
   },
   computed: {
