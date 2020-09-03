@@ -1,4 +1,4 @@
-import { i as isWeekend, a as isToday, g as getLocaleTime, b as _objectSpread2, c as cloneObject, d as __vue_normalize__, e as __vue_create_injector__, f as isBefore, h as getHourlessDate, j as addTimezoneInfo } from './index-9625a812.js';
+import { i as isWeekend, a as isToday, g as getLocaleTime, b as _objectSpread2, c as cloneObject, d as __vue_normalize__, e as __vue_create_injector__, f as isBefore, h as getHourlessDate, j as addTimezoneInfo } from './index-ea077a48.js';
 import 'vue';
 
 function PromiseWorker (worker) {
@@ -124,7 +124,7 @@ var script = {
   },
   components: {
     kalendarCell: function kalendarCell() {
-      return import('./kalendar-cell-3d04f0d3.js');
+      return import('./kalendar-cell-c5f22594.js');
     }
   },
   provide: function provide() {
@@ -508,9 +508,7 @@ var __vue_render__ = function __vue_render__() {
       expression: "kalendar_options.style === 'material_design'"
     }],
     staticClass: "line"
-  })]) : _vm._e(), _vm._v(" "), _c('div', {
-    staticClass: "day_cells"
-  }, [_vm._v(_vm._s(_vm.day_cells))]), _vm._v(" "), _vm._l(_vm.day_cells, function (cell, index) {
+  })]) : _vm._e(), _vm._v(" "), _vm._l(_vm.day_cells, function (cell, index) {
     return _c('kalendar-cell', {
       key: "cell-" + index,
       attrs: {
@@ -538,7 +536,7 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-e95391c8_0", {
+  inject("data-v-1724e754_0", {
     source: "ul.kalendar-day{position:relative;background-color:#fff}ul.kalendar-day.is-weekend{background-color:var(--weekend-color)}ul.kalendar-day.is-today{background-color:var(--current-day-color)}ul.kalendar-day .clear{position:absolute;z-index:1;top:-20px;right:0;font-size:10px}ul.kalendar-day.creating{z-index:11}ul.kalendar-day.creating .created-event{pointer-events:none}",
     map: undefined,
     media: undefined
