@@ -225,7 +225,7 @@ var formatAMPM = function formatAMPM(date) {
 var script = {
   components: {
     KalendarWeekView: function KalendarWeekView() {
-      return import('./kalendar-weekview-4e194596.js');
+      return import('./kalendar-weekview-c8c0e973.js');
     }
   },
   props: {
