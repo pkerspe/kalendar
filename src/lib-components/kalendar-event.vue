@@ -1,11 +1,11 @@
 <template>
     <div
-            class="event-card"
+            class="new-card event-card {{customCalendarEventClass}}"
             :ref="`kalendarEventRef-${event.id}`"
             :style="
             `
-      height: ${distance}; 
-      width: calc(${width_value}); 
+      height: ${distance};
+      width: calc(${width_value});
       left: calc(${left_offset});
       top: ${top_offset};
     `
