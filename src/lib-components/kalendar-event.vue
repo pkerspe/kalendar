@@ -1,18 +1,10 @@
 <template>
-    <div
-            class="event-card"
-            :ref="`kalendarEventRef-${event.id}`"
-            :style="
-            `
-      height: ${distance};
-      width: calc(${width_value});
-      left: calc(${left_offset});
-      top: ${top_offset};
-    `
-        "
-            @click="inspecting = true"
-            @mouseleave="inspecting = false"
-            :class="eventCardClasses"
+    <div class="event-card"
+         :ref="`kalendarEventRef-${event.id}`"
+         :style="`height: ${distance}; width: calc(${width_value}); left: calc(${left_offset}); top: ${top_offset};`"
+         @click="inspecting = true"
+         @mouseleave="inspecting = false"
+         :class="eventCardClasses"
     >
         <template v-if="status === 'creating' || status === 'popup-initiated'">
             <div class="creating-event">
@@ -65,7 +57,7 @@
     import {isBefore, getLocaleTime, addTimezoneInfo, getTime} from './utils.js';
 
     export default {
-        props: ['event', 'total', 'index', 'overlaps'],
+        props: ['event', 'total', 'index', 'overlaps', 'cellData'],
         created() {
         },
         inject: ['kalendar_options'],
@@ -75,15 +67,17 @@
             new_appointment: {},
         }),
         filters: {
-            formatTime: function(date){
+            formatTime: function (date) {
                 return getTime(date);
             }
         },
         methods: {
-            addAppointment: function(information){
+            addAppointment: function (information) {
+                information['data'] = this.new_appointment;
                 window.calendarEventBus.$emit('addAppointmentEvent', information);
+                this.new_appointment = {};
             },
-            closePopups: function(){
+            closePopups: function () {
                 window.calendarEventBus.$emit('closePopupsEvent');
             }
         },
@@ -100,11 +94,9 @@
                 if (this.customCalendarEventClass != "") {
                     props[this.customCalendarEventClass] = true;
                 }
-                console.log(props);
                 return props;
             },
             customCalendarEventClass() {
-                console.log(this.event);
                 if (!this.event || !this.event.data || !this.event.data.customEventCardClass) return '';
                 return this.event.data.customEventCardClass + '';
             },
@@ -128,7 +120,15 @@
             distance() {
                 if (!this.event) return;
                 let multiplier = this.kalendar_options.cell_height / 10;
-                // 0.5 * multiplier for an offset so next cell is easily selected
+
+                let totalCellsPerDay = (this.kalendar_options.day_ends_at - this.kalendar_options.day_starts_at) * 6;
+                let numberOfCellsToScheduleEnd = totalCellsPerDay - this.cellData.index;
+                let numberOfMinutesToScheduleEnd = numberOfCellsToScheduleEnd * 10 - this.event.start.round_offset;
+
+                if (this.event.distance > numberOfMinutesToScheduleEnd) {
+                    this.event.distance = numberOfMinutesToScheduleEnd;
+                }
+                // 0.2 * multiplier for an offset so next cell is easily selected
                 return `${this.event.distance * multiplier - 0.2 * multiplier}px`;
             },
             status() {

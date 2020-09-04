@@ -1,201 +1,230 @@
 import registerPromiseWorker from "./registerPromiseWorker.js";
 import {
-  generateUUID,
-  addDays,
-  addMinutes,
-  addHours,
-  getYearMonthDay,
-  getLocaleTime
+    generateUUID,
+    addDays,
+    addMinutes,
+    addHours,
+    getYearMonthDay,
+    getLocaleTime
 } from "../utils.js";
 import hourUtils from "../hours.js";
 
 registerPromiseWorker(message => {
-  const { type, data } = message;
-  if (type === "message") {
-    return `Worker replies: ${new Date().toISOString()}`;
-  }
+    const {type, data} = message;
+    if (type === "message") {
+        return `Worker replies: ${new Date().toISOString()}`;
+    }
 
-  switch (type) {
-    case "getDays":
-      return getDays(data.day, data.options);
-    case "getHours":
-      return getHours(data.hourOptions);
-    case "getDayCells":
-      return getDayCells(data.day, data.hourOptions);
-    case "constructDayEvents":
-      return constructDayEvents(data.day, data.events);
-    case "constructNewEvent":
-      return constructNewEvent(data.event);
-  }
+    switch (type) {
+        case "getDays":
+            return getDays(data.day, data.options);
+        case "getHours":
+            return getHours(data.hourOptions);
+        case "getDayCells":
+            return getDayCells(data.day, data.hourOptions);
+        case "constructDayEvents":
+            return constructDayEvents(data.day, data.events, data.hourOptions);
+        case "constructNewEvent":
+            return constructNewEvent(data.event, data.day, data.hourOptions);
+    }
 });
 
-function getDays(dayString, { hide_dates, hide_days, view_type }) {
-  let date = new Date(`${dayString}T00:00:00.000Z`);
-  let day_of_week = date.getUTCDay() - 1;
-  let days = [];
-  if (view_type === "day") {
-    days = [
-      {
-        value: date.toISOString(),
-        index: 0
-      }
-    ];
-  } else {
-    for (let idx = 0; idx < 7; idx++) {
-      days.push({
-        value: addDays(date, idx - day_of_week).toISOString(),
-        index: idx
-      });
+function getDays(dayString, {hide_dates, hide_days, view_type}) {
+    let date = new Date(`${dayString}T00:00:00.000Z`);
+    let day_of_week = date.getUTCDay() - 1;
+    let days = [];
+    if (view_type === "day") {
+        days = [
+            {
+                value: date.toISOString(),
+                index: 0
+            }
+        ];
+    } else {
+        for (let idx = 0; idx < 7; idx++) {
+            days.push({
+                value: addDays(date, idx - day_of_week).toISOString(),
+                index: idx
+            });
+        }
     }
-  }
-  if (hide_dates && hide_dates.length > 0) {
-    days = days.filter(({ value }) => {
-      return hide_dates.indexOf(value.slice(0, 10)) < 0;
-    });
-  }
-  if (hide_days && hide_days.length > 0) {
-    days = days.filter(({ index }) => {
-      return hide_days.indexOf(index) < 0;
-    });
-  }
-  return days;
+    if (hide_dates && hide_dates.length > 0) {
+        days = days.filter(({value}) => {
+            return hide_dates.indexOf(value.slice(0, 10)) < 0;
+        });
+    }
+    if (hide_days && hide_days.length > 0) {
+        days = days.filter(({index}) => {
+            return hide_days.indexOf(index) < 0;
+        });
+    }
+    return days;
 }
 
 function getHours(hour_options) {
-  let date = new Date();
-  date.setUTCHours(0, 0, 0, 0);
-  let iso_date = getYearMonthDay(date);
+    let date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    let iso_date = getYearMonthDay(date);
 
-  let day_hours = hourUtils.getFullHours();
-  if (hour_options) {
-    let { start_hour, end_hour } = hour_options;
-    day_hours = day_hours.slice(start_hour, end_hour);
-  }
-  let hours = [];
-  for (let idx = 0; idx < day_hours.length; idx++) {
-    let value = `${iso_date}T${day_hours[idx]}.000Z`;
-    hours.push({
-      value,
-      index: idx,
-      visible: true
-    });
-  }
-  return hours;
+    let day_hours = hourUtils.getFullHours();
+    if (hour_options) {
+        let {start_hour, end_hour} = hour_options;
+        day_hours = day_hours.slice(start_hour, end_hour);
+    }
+    let hours = [];
+    for (let idx = 0; idx < day_hours.length; idx++) {
+        let value = `${iso_date}T${day_hours[idx]}.000Z`;
+        hours.push({
+            value,
+            index: idx,
+            visible: true
+        });
+    }
+    return hours;
 }
 
 const getDayCells = (dayString, day_options) => {
-  if (new Date(dayString).toISOString() !== dayString) {
-    throw new Error("Unsupported dayString parameter provided");
-  }
-
-  let cells = [];
-  let date_part = dayString.slice(0, 10);
-  let all_hours = hourUtils.getAllHours();
-  if (day_options) {
-    let { start_hour, end_hour } = day_options;
-    let start_index = start_hour * 6;
-    let end_index = end_hour * 6 + 1;
-    all_hours = all_hours.slice(start_index, end_index);
-  }
-  for (let hourIdx = 0; hourIdx < all_hours.length; hourIdx++) {
-    let hour = all_hours[hourIdx];
-    let value = `${date_part}T${hour}.000Z`;
-    cells.push({
-      value,
-      index: hourIdx,
-      visible: true
-    });
-  }
-  return cells;
-};
-
-const constructDayEvents = (day, existing_events) => {
-  let events_for_this_day = existing_events
-    .map(event => {
-      let { from, to } = event;
-      from = getLocaleTime(from);
-      to = getLocaleTime(to);
-      return {
-        ...event,
-        from,
-        to
-      };
-    })
-    .filter(({ from }) => {
-      return from.slice(0, 10) === day.slice(0, 10);
-    });
-
-  if (events_for_this_day.length === 0) return {};
-  let filtered_events = {};
-  events_for_this_day.forEach(event => {
-    const constructedEvent = constructNewEvent(event);
-    let { key } = constructedEvent;
-    if (filtered_events.hasOwnProperty(key)) {
-      filtered_events[key].push(constructedEvent);
-    } else {
-      filtered_events[key] = [constructedEvent];
+    if (new Date(dayString).toISOString() !== dayString) {
+        throw new Error("Unsupported dayString parameter provided");
     }
-  });
-  return filtered_events;
+
+    let cells = [];
+    let date_part = dayString.slice(0, 10);
+    let all_hours = hourUtils.getAllHours();
+    if (day_options) {
+        let {start_hour, end_hour} = day_options;
+        let start_index = start_hour * 6;
+        let end_index = end_hour * 6 + 1;
+        all_hours = all_hours.slice(start_index, end_index);
+    }
+    for (let hourIdx = 0; hourIdx < all_hours.length; hourIdx++) {
+        let hour = all_hours[hourIdx];
+        let value = `${date_part}T${hour}.000Z`;
+        cells.push({
+            value,
+            index: hourIdx,
+            visible: true
+        });
+    }
+    return cells;
 };
 
-const constructNewEvent = event => {
-  let { from, to } = event;
+/**
+ * get all events for the given day.
+ * This includes events that start or end on the given day or span the whole day (multi-day events)
+ * @param day
+ * @param existing_events
+ * @returns {{}}
+ */
+const constructDayEvents = (day, existing_events, day_options) => {
+    //day is date to display events at 00:00
+    let dayStart = new Date(day);
+    let dayEnd = new Date(day);
+    dayEnd.setHours(23, 23, 59);
 
-  from = new Date(from);
-  to = new Date(to);
+    let events_for_this_day = existing_events
+        .map(event => {
+            let {from, to} = event;
+            from = getLocaleTime(from);
+            to = getLocaleTime(to);
+            return {
+                ...event,
+                from,
+                to
+            };
+        })
+        .filter(eventEntry => {
+            //get all events that start on the current day
+            if (eventEntry.from.slice(0, 10) === day.slice(0, 10)) {
+                return true;
+            } else if (eventEntry.to.slice(0, 10) == day.slice(0, 10)) {
+                //or events that end on the current day
+                return true;
+            } else if (new Date(eventEntry.from).getTime() < dayStart.getTime() && new Date(eventEntry.to).getTime() > dayEnd.getTime()) {
+                //or that started before the current day and end after the current day
+                return true;
+            }
+            return false;
+        });
 
-  from.setUTCSeconds(0, 0);
-  to.setUTCSeconds(0, 0);
-  let from_value = from.toISOString();
-  let masked_from = new Date(from.getTime());
-  let masked_to = new Date(to.getTime());
-  const fromData = {
-    value: from_value,
-    masked_value: masked_from.toISOString(),
-    rounded: false,
-    round_offset: null
-  };
-  const to_value = to.toISOString();
-  const toData = {
-    value: to_value,
-    masked_value: masked_to.toISOString(),
-    rounded: false,
-    round_offset: null
-  };
+    if (events_for_this_day.length === 0) return {};
+    let filtered_events = {};
+    events_for_this_day.forEach(event => {
+        const constructedEvent = constructNewEvent(event, day, day_options);
+        //UPDATE TIMES FOR MULTIDAY EVENTS
+        let {key} = constructedEvent;
+        if (filtered_events.hasOwnProperty(key)) {
+            filtered_events[key].push(constructedEvent);
+        } else {
+            filtered_events[key] = [constructedEvent];
+        }
+    });
 
-  let multipleOf10 = dateStr => new Date(dateStr).getMinutes() % 10;
+    return filtered_events;
+};
 
-  if (multipleOf10(fromData.value) !== 0) {
-    fromData.rounded = true;
-    fromData.round_offset = multipleOf10(fromData.value);
-    let minutes = new Date(fromData.value).getMinutes();
-    let maskedMinutes = Math.floor(minutes / 10) * 10;
-    masked_from.setMinutes(maskedMinutes);
-    fromData.masked_value = masked_from.toISOString();
-  }
+const constructNewEvent = function (event, day, day_options) {
+    let {from, to} = event;
 
-  let eventKey = masked_from.toISOString();
+    from = new Date(from);
+    to = new Date(to);
 
-  // 1 minute equals 1 pixel in our view. That means we need to find the length
-  // of the event by finding out the difference in minutes
-  const diffInMs = to - from;
-  const diffInHrs = Math.floor((diffInMs % 86400000) / 3600000);
-  const diffMins = Math.round(((diffInMs % 86400000) % 3600000) / 60000);
+    from.setUTCSeconds(0, 0);
+    to.setUTCSeconds(0, 0);
+    let from_value = from.toISOString();
+    let masked_from = new Date(from.getTime());
+    let masked_to = new Date(to.getTime());
+    const fromData = {
+        value: from_value,
+        masked_value: masked_from.toISOString(),
+        rounded: false,
+        round_offset: null
+    };
+    const to_value = to.toISOString();
+    const toData = {
+        value: to_value,
+        masked_value: masked_to.toISOString(),
+        rounded: false,
+        round_offset: null
+    };
 
-  let constructedEvent = {
-    start: fromData,
-    end: toData,
-    data: event.data,
-    id: event.id || generateUUID(),
-    distance: diffMins + diffInHrs * 60,
-    status: "completed",
-    key: eventKey
-  };
+    let multipleOf10 = new Date(fromData.value).getMinutes() % 10;
 
-  console.log("Constructed event:", constructedEvent);
+    if (multipleOf10 !== 0) {
+        fromData.rounded = true;
+        fromData.round_offset = multipleOf10;
+        let minutes = new Date(fromData.value).getMinutes();
+        let maskedMinutes = Math.floor(minutes / 10) * 10;
+        masked_from.setMinutes(maskedMinutes);
+        fromData.masked_value = masked_from.toISOString();
+    }
 
-  return constructedEvent;
+    let eventKey = masked_from.toISOString();
+
+
+    let dayBegin = new Date(day);
+    let dayEnd = new Date(day);
+    dayEnd.setHours(23, 59, 59);
+    if (from.getTime() < dayBegin.getTime()) {
+        dayBegin.setHours(day_options.start_hour - dayBegin.getTimezoneOffset() / 60);
+        from = new Date(dayBegin);
+        eventKey = dayBegin.toISOString();
+    }
+    // we need to find the length (height)
+    // of the event by finding out the difference in minutes
+    const diffInMinutes = Math.ceil((to - from) / 60000);
+
+    let constructedEvent = {
+        start: fromData,
+        end: toData,
+        data: event.data,
+        id: event.id || generateUUID(),
+        distance: diffInMinutes,
+        status: "completed",
+        key: eventKey
+    };
+
+    return constructedEvent;
 };
 
 /**
@@ -204,11 +233,11 @@ const constructNewEvent = event => {
  * @return {Date[]} List with date objects for each day of the month
  */
 const getDaysInMonth = (month, year) => {
-  var date = new Date(year, month, 1);
-  var days = [];
-  while (date.getMonth() === month) {
-    days.push(new Date(date));
-    date.setDate(date.getDate() + 1);
-  }
-  return days;
+    var date = new Date(year, month, 1);
+    var days = [];
+    while (date.getMonth() === month) {
+        days.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+    }
+    return days;
 };

@@ -22,10 +22,8 @@
     "scripts": {
         "serve": "vue-cli-service serve src/serve-dev.js",
         "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
-        "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
-        "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
         "build:demo": "vue-cli-service build src/serve-dev.js",
-        "copydist": "cross-env NODE_ENV=production rollup --config build/rollup.config.js && cp -R ./dist/* ../dispotool_frontend/node_modules/kalendar-vue/dist/"
+        "copydist": "cross-env NODE_ENV=development rollup --config build/rollup.config.js && cp -R ./dist/* ../dispotool_frontend/node_modules/kalendar-vue/dist/"
     },
     "dependencies": {
         "element-ui": "^2.13.2",

@@ -39,7 +39,7 @@ const baseConfig = {
     vue: {
       css: true,
       template: {
-        isProduction: true
+        isProduction: false
       }
     },
     babel: {
@@ -94,7 +94,9 @@ if (!argv.format || argv.format === "es") {
       cleaner({
         targets: ["./dist/"]
       }),
-      strip(),
+      strip({
+        functions: ['console.log', 'assert.*' ]
+      }),
       webWorkerLoader({
         forceInline: true,
         pattern: /worker-loader!(.+)/
@@ -102,39 +104,6 @@ if (!argv.format || argv.format === "es") {
     ]
   };
   buildFormats.push(esConfig);
-}
-
-if (!argv.format || argv.format === "cjs") {
-  const umdConfig = {
-    inlineDynamicImports: true,
-    ...baseConfig,
-    external,
-    output: {
-      compact: true,
-      file: "dist/kalendar-vue.umd.js",
-      format: "cjs",
-      name: "KalendarVue",
-      exports: "named",
-      globals
-    },
-    plugins: [
-      ...baseConfig.plugins.preVue,
-      vue({
-        ...baseConfig.plugins.vue,
-        template: {
-          ...baseConfig.plugins.vue.template
-        }
-      }),
-      babel(baseConfig.plugins.babel),
-      commonjs(),
-      strip(),
-      webWorkerLoader({
-        forceInline: true,
-        pattern: /worker-loader!(.+)/
-      })
-    ]
-  };
-  buildFormats.push(umdConfig);
 }
 
 // Export config

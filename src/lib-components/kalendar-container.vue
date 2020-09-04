@@ -166,6 +166,11 @@
                 scrollable: true,
             };
         },
+        watch: {
+            events: function (events) {
+                this.processEvents(events);
+            },
+        },
         computed: {
             kalendar_options() {
                 let options = this.default_options;
@@ -207,11 +212,7 @@
             calendarEventBus.$on('addAppointmentEvent', information => this.addAppointment(information));
 
             this.current_day = this.kalendar_options.start_day;
-            this.kalendar_events = this.events.map(event => ({
-                ...event,
-                id: event.id || generateUUID(),
-            }));
-
+            this.processEvents(this.events);
             if (!this.$kalendar) {
                 Vue.prototype.$kalendar = {};
             }
@@ -219,16 +220,15 @@
             this.$kalendar.getEvents = () => this.kalendar_events.slice(0);
 
             this.$kalendar.updateEvents = payload => {
-                this.kalendar_events = payload.map(event => ({
-                    ...event,
-                    id: event.id || generateUUID(),
-                }));
+                this.processEvents(payload);
                 this.$emit(
                     'update:events',
                     payload.map(event => ({
                         from: event.from,
                         to: event.to,
                         data: event.data,
+                        id: event.id,
+                        calendarId: event.calendarId
                     }))
                 );
             };
@@ -246,30 +246,30 @@
             return provider;
         },
         methods: {
+            processEvents: function(eventArray){
+                let start = new Date().getTime();
+                this.kalendar_events = eventArray.map(event => ({
+                    ...event,
+                    id: event.id || generateUUID(),
+                    calendarId: event.calendarId || 'default'
+                }));
+            },
             getTime,
             changeDay(numDays) {
                 this.current_day = addDays(this.current_day, numDays).toISOString();
-                setTimeout(() => this.$kalendar.buildWeek());
+                this.$nextTick(() => this.$kalendar.buildWeek());
             },
             addAppointment(popup_info) {
                 let payload = {
-                    data: {
-                        title: this.new_appointment.title,
-                        description: this.new_appointment.description,
-                    },
+                    data: popup_info.data,
                     from: popup_info.start_time,
                     to: popup_info.end_time,
+                    id: generateUUID(),
+                    calendarId: 'default'
                 };
 
                 this.$kalendar.addNewEvent(payload);
                 this.$kalendar.closePopups();
-                this.clearFormData();
-            },
-            clearFormData() {
-                this.new_appointment = {
-                    description: null,
-                    title: null,
-                };
             },
             closePopups() {
                 this.$kalendar.closePopups();

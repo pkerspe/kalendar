@@ -28,15 +28,6 @@
         ></li>
       </ul>
     </div>
-    <div class="dummy-row" v-if="false">
-      <ul class="dummy-days">
-        <li
-          :key="index"
-          v-for="(day, index) in days || []"
-          :style="`height:${kalendar_options.cell_height}px`"
-        ></li>
-      </ul>
-    </div>
     <div class="blocks" v-if="hours">
       <div class="calendar-blocks">
         <ul class="hours">

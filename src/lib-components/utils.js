@@ -117,13 +117,27 @@ const getDayDateID = date => {
   return `${year}-${month}-${day}`;
 };
 
+/**
+ * return a formatted date string with timezone compensation
+ * @param dateString
+ * @returns {string}
+ */
 const getLocaleTime = dateString => {
+  let cleanedDate = new Date(dateString);
+  cleanedDate.setHours(cleanedDate.getHours() - cleanedDate.getTimezoneOffset()/60);
+  cleanedDate.setMilliseconds(0);
+  cleanedDate.setSeconds(0);
+  return cleanedDate.toISOString();
+
+  /*
   let [date, hour] = new Date(dateString).toLocaleString("en-GB").split(", ");
   date = date
     .split("/")
     .reverse()
     .join("-");
-  return `${date}T${hour}.000Z`;
+  let response = `${date}T${hour}.000Z`;
+  return response;
+  */
 };
 
 const addTimezoneInfo = ISOdate => {

@@ -32,7 +32,6 @@
 </template>
 <script>
     import {isToday, isWeekend, cloneObject, getLocaleTime} from "./utils";
-
     import myWorker from "@/lib-components/workers";
 
     export default {
@@ -100,7 +99,7 @@
                     })
                     .then(reply => {
                         this.day_cells = reply;
-                        return this.getDayEvents(this.$kalendar.getEvents());
+                        this.getDayEvents(this.$kalendar.getEvents());
                     });
             },
 
@@ -122,6 +121,11 @@
                             ...payload,
                             from,
                             to
+                        },
+                        day: from,
+                        hourOptions: {
+                            start_hour: this.kalendar_options.day_starts_at,
+                            end_hour: this.kalendar_options.day_ends_at
                         }
                     })
                     .then(constructed_event => {
@@ -174,9 +178,16 @@
                 return myWorker
                     .send("constructDayEvents", {
                         events: clonedEvents,
-                        day: this.day.value
+                        day: this.day.value,
+                        hourOptions: {
+                            start_hour: this.kalendar_options.day_starts_at,
+                            end_hour: this.kalendar_options.day_ends_at
+                        }
                     })
                     .then(constructed_events => {
+                        if(Object.keys(constructed_events).length > 0) {
+                            console.debug("Events for current day " + this.day.value, constructed_events);
+                        }
                         this.day_events = constructed_events;
                     });
             },

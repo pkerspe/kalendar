@@ -183,15 +183,28 @@ var generateUUID = function generateUUID() {
 var cloneObject = function cloneObject(object) {
   return JSON.parse(JSON.stringify(object));
 };
+/**
+ * return a formatted date string with timezone compensation
+ * @param dateString
+ * @returns {string}
+ */
+
 
 var getLocaleTime = function getLocaleTime(dateString) {
-  var _Date$toLocaleString$ = new Date(dateString).toLocaleString("en-GB").split(", "),
-      _Date$toLocaleString$2 = _slicedToArray(_Date$toLocaleString$, 2),
-      date = _Date$toLocaleString$2[0],
-      hour = _Date$toLocaleString$2[1];
-
-  date = date.split("/").reverse().join("-");
-  return "".concat(date, "T").concat(hour, ".000Z");
+  var cleanedDate = new Date(dateString);
+  cleanedDate.setHours(cleanedDate.getHours() - cleanedDate.getTimezoneOffset() / 60);
+  cleanedDate.setMilliseconds(0);
+  cleanedDate.setSeconds(0);
+  return cleanedDate.toISOString();
+  /*
+  let [date, hour] = new Date(dateString).toLocaleString("en-GB").split(", ");
+  date = date
+    .split("/")
+    .reverse()
+    .join("-");
+  let response = `${date}T${hour}.000Z`;
+  return response;
+  */
 };
 
 var addTimezoneInfo = function addTimezoneInfo(ISOdate) {
@@ -225,7 +238,7 @@ var formatAMPM = function formatAMPM(date) {
 var script = {
   components: {
     KalendarWeekView: function KalendarWeekView() {
-      return import('./kalendar-weekview-fa366038.js');
+      return import('./kalendar-weekview-206748d2.js');
     }
   },
   props: {
@@ -291,6 +304,11 @@ var script = {
       new_appointment: {},
       scrollable: true
     };
+  },
+  watch: {
+    events: function events(_events) {
+      this.processEvents(_events);
+    }
   },
   computed: {
     kalendar_options: function kalendar_options() {
@@ -361,11 +379,7 @@ var script = {
       return _this2.addAppointment(information);
     });
     this.current_day = this.kalendar_options.start_day;
-    this.kalendar_events = this.events.map(function (event) {
-      return _objectSpread2(_objectSpread2({}, event), {}, {
-        id: event.id || generateUUID()
-      });
-    });
+    this.processEvents(this.events);
 
     if (!this.$kalendar) {
       Vue.prototype.$kalendar = {};
@@ -376,17 +390,15 @@ var script = {
     };
 
     this.$kalendar.updateEvents = function (payload) {
-      _this2.kalendar_events = payload.map(function (event) {
-        return _objectSpread2(_objectSpread2({}, event), {}, {
-          id: event.id || generateUUID()
-        });
-      });
+      _this2.processEvents(payload);
 
       _this2.$emit('update:events', payload.map(function (event) {
         return {
           from: event.from,
           to: event.to,
-          data: event.data
+          data: event.data,
+          id: event.id,
+          calendarId: event.calendarId
         };
       }));
     };
@@ -410,33 +422,34 @@ var script = {
     return provider;
   },
   methods: {
+    processEvents: function processEvents(eventArray) {
+      var start = new Date().getTime();
+      this.kalendar_events = eventArray.map(function (event) {
+        return _objectSpread2(_objectSpread2({}, event), {}, {
+          id: event.id || generateUUID(),
+          calendarId: event.calendarId || 'default'
+        });
+      });
+    },
     getTime: getTime,
     changeDay: function changeDay(numDays) {
       var _this4 = this;
 
       this.current_day = addDays(this.current_day, numDays).toISOString();
-      setTimeout(function () {
+      this.$nextTick(function () {
         return _this4.$kalendar.buildWeek();
       });
     },
     addAppointment: function addAppointment(popup_info) {
       var payload = {
-        data: {
-          title: this.new_appointment.title,
-          description: this.new_appointment.description
-        },
+        data: popup_info.data,
         from: popup_info.start_time,
-        to: popup_info.end_time
+        to: popup_info.end_time,
+        id: generateUUID(),
+        calendarId: 'default'
       };
       this.$kalendar.addNewEvent(payload);
       this.$kalendar.closePopups();
-      this.clearFormData();
-    },
-    clearFormData: function clearFormData() {
-      this.new_appointment = {
-        description: null,
-        title: null
-      };
     },
     closePopups: function closePopups() {
       this.$kalendar.closePopups();
@@ -583,128 +596,128 @@ var __vue_render__ = function __vue_render__() {
 
   var _c = _vm._self._c || _h;
 
-  return _c('div', {
+  return _c("div", {
     staticClass: "kalendar-wrapper",
     class: {
-      'no-scroll': !_vm.scrollable,
-      gstyle: _vm.kalendar_options.style === 'material_design',
-      'day-view': _vm.kalendar_options.view_type === 'day'
+      "no-scroll": !_vm.scrollable,
+      gstyle: _vm.kalendar_options.style === "material_design",
+      "day-view": _vm.kalendar_options.view_type === "day"
     },
     on: {
-      "touchstart": function touchstart($event) {
+      touchstart: function touchstart($event) {
         _vm.scrollable = false;
       },
-      "touchend": function touchend($event) {
+      touchend: function touchend($event) {
         _vm.scrollable = true;
       }
     }
-  }, [_c('div', {
+  }, [_c("div", {
     staticClass: "week-navigator"
-  }, [_vm.kalendar_options.view_type === 'week' ? _c('div', {
+  }, [_vm.kalendar_options.view_type === "week" ? _c("div", {
     staticClass: "nav-wrapper"
-  }, [_c('button', {
+  }, [_c("button", {
     staticClass: "week-navigator-button",
     on: {
-      "click": function click($event) {
+      click: function click($event) {
         return _vm.changeDay(-7);
       }
     }
-  }, [_c('svg', {
+  }, [_c("svg", {
     staticClass: "css-i6dzq1",
     staticStyle: {
-      "transform": "rotate(180deg)"
+      transform: "rotate(180deg)"
     },
     attrs: {
-      "viewBox": "0 0 24 24",
-      "width": "24",
-      "height": "24",
-      "stroke": "currentColor",
+      viewBox: "0 0 24 24",
+      width: "24",
+      height: "24",
+      stroke: "currentColor",
       "stroke-width": "2",
-      "fill": "none",
+      fill: "none",
       "stroke-linecap": "round",
       "stroke-linejoin": "round"
     }
-  }, [_c('polyline', {
+  }, [_c("polyline", {
     attrs: {
-      "points": "9 18 15 12 9 6"
+      points: "9 18 15 12 9 6"
     }
-  })])]), _vm._v(" "), _c('div', [_c('span', [_vm._v(_vm._s(_vm.kalendar_options.formatWeekNavigator(_vm.current_day)))])]), _vm._v(" "), _c('button', {
+  })])]), _vm._v(" "), _c("div", [_c("span", [_vm._v(_vm._s(_vm.kalendar_options.formatWeekNavigator(_vm.current_day)))])]), _vm._v(" "), _c("button", {
     staticClass: "week-navigator-button",
     on: {
-      "click": function click($event) {
+      click: function click($event) {
         return _vm.changeDay(7);
       }
     }
-  }, [_c('svg', {
+  }, [_c("svg", {
     staticClass: "css-i6dzq1",
     attrs: {
-      "viewBox": "0 0 24 24",
-      "width": "24",
-      "height": "24",
-      "stroke": "currentColor",
+      viewBox: "0 0 24 24",
+      width: "24",
+      height: "24",
+      stroke: "currentColor",
       "stroke-width": "2",
-      "fill": "none",
+      fill: "none",
       "stroke-linecap": "round",
       "stroke-linejoin": "round"
     }
-  }, [_c('polyline', {
+  }, [_c("polyline", {
     attrs: {
-      "points": "9 18 15 12 9 6"
+      points: "9 18 15 12 9 6"
     }
-  })])])]) : _vm._e(), _vm._v(" "), _vm.kalendar_options.view_type === 'day' ? _c('div', {
+  })])])]) : _vm._e(), _vm._v(" "), _vm.kalendar_options.view_type === "day" ? _c("div", {
     staticClass: "nav-wrapper"
-  }, [_c('button', {
+  }, [_c("button", {
     staticClass: "week-navigator-button",
     on: {
-      "click": function click($event) {
+      click: function click($event) {
         return _vm.changeDay(-1);
       }
     }
-  }, [_c('svg', {
+  }, [_c("svg", {
     staticClass: "css-i6dzq1",
     staticStyle: {
-      "transform": "rotate(180deg)"
+      transform: "rotate(180deg)"
     },
     attrs: {
-      "viewBox": "0 0 24 24",
-      "width": "24",
-      "height": "24",
-      "stroke": "currentColor",
+      viewBox: "0 0 24 24",
+      width: "24",
+      height: "24",
+      stroke: "currentColor",
       "stroke-width": "2",
-      "fill": "none",
+      fill: "none",
       "stroke-linecap": "round",
       "stroke-linejoin": "round"
     }
-  }, [_c('polyline', {
+  }, [_c("polyline", {
     attrs: {
-      "points": "9 18 15 12 9 6"
+      points: "9 18 15 12 9 6"
     }
-  })])]), _vm._v(" "), _c('div', [_c('span', [_vm._v(_vm._s(_vm.kalendar_options.formatDayNavigator(_vm.current_day)))])]), _vm._v(" "), _c('button', {
+  })])]), _vm._v(" "), _c("div", [_c("span", [_vm._v(_vm._s(_vm.kalendar_options.formatDayNavigator(_vm.current_day)))])]), _vm._v(" "), _c("button", {
     staticClass: "week-navigator-button",
     on: {
-      "click": function click($event) {
+      click: function click($event) {
         return _vm.changeDay(1);
       }
     }
-  }, [_c('svg', {
+  }, [_c("svg", {
     staticClass: "css-i6dzq1",
     attrs: {
-      "viewBox": "0 0 24 24",
-      "width": "24",
-      "height": "24",
-      "stroke": "currentColor",
+      viewBox: "0 0 24 24",
+      width: "24",
+      height: "24",
+      stroke: "currentColor",
       "stroke-width": "2",
-      "fill": "none",
+      fill: "none",
       "stroke-linecap": "round",
       "stroke-linejoin": "round"
     }
-  }, [_c('polyline', {
+  }, [_c("polyline", {
     attrs: {
-      "points": "9 18 15 12 9 6"
+      points: "9 18 15 12 9 6"
     }
-  })])])]) : _vm._e()]), _vm._v(" "), _c('kalendar-week-view', {
+  })])])]) : _vm._e()]), _vm._v(" "), _c("kalendar-week-view", {
     attrs: {
-      "current_day": _vm.current_day
+      current_day: _vm.current_day
     },
     scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
       return {
@@ -718,12 +731,13 @@ var __vue_render__ = function __vue_render__() {
 };
 
 var __vue_staticRenderFns__ = [];
+__vue_render__._withStripped = true;
 /* style */
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-08a8a07a_0", {
-    source: "*{box-sizing:border-box}.kalendar-wrapper{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\";--main-color:#ec4d3d;--weekend-color:#f7f7f7;--current-day-color:#fef4f4;--table-cell-border-color:#e5e5e5;--odd-cell-border-color:#e5e5e5;--hour-row-color:inherit;--dark:#212121;--lightg:#9e9e9e;--card-bgcolor:#4285f4;--card-color:white;--max-hours:10;--previous-events:#c6dafc;--previous-text-color:#727d8f}.kalendar-wrapper.gstyle{--hour-row-color:#212121;--main-color:#4285f4;--weekend-color:transparent;--current-day-color:transparent;--table-cell-border-color:#e0e0e0;--odd-cell-border-color:transparent;font-family:\"Google Sans\",Roboto,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Arial,sans-serif}.kalendar-wrapper.gstyle .week-navigator{background:#fff;border-bottom:none;padding:20px;color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .week-navigator button{color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .created-event,.kalendar-wrapper.gstyle .creating-event{background-color:var(--card-bgcolor);color:var(--card-color);text-shadow:none;border-left:none;border-radius:2px;opacity:1;border-bottom:solid 1px rgba(0,0,0,.03)}.kalendar-wrapper.gstyle .created-event>*,.kalendar-wrapper.gstyle .creating-event>*{text-shadow:none}.kalendar-wrapper.gstyle .is-past .created-event,.kalendar-wrapper.gstyle .is-past .creating-event{background-color:var(--previous-events);color:var(--previous-text-color)}.kalendar-wrapper.gstyle .created-event{width:96%}.kalendar-wrapper.gstyle .created-event .time{right:2px}.kalendar-wrapper.gstyle .sticky-top .days{margin-left:0;padding-left:55px}.kalendar-wrapper.gstyle .all-day{display:none}.kalendar-wrapper.gstyle ul.building-blocks.day-1 li.is-an-hour::before{content:\"\";position:absolute;bottom:-1px;left:-10px;width:10px;height:1px;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours,.kalendar-wrapper.gstyle ul.building-blocks li{border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours li{font-size:80%}.kalendar-wrapper.gstyle .hour-indicator-line>span.line{height:2px;background-color:#db4437}.kalendar-wrapper.gstyle .hour-indicator-line>span.line:before{content:\"\";width:12px;height:12px;display:block;background-color:#db4437;position:absolute;top:-1px;left:0;border-radius:100%}.kalendar-wrapper.gstyle .days{border-top:solid 1px var(--table-cell-border-color);position:relative}.kalendar-wrapper.gstyle .days:before{content:\"\";position:absolute;height:1px;width:55px;left:0;bottom:0;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator{display:flex;flex-direction:column;align-items:center;color:var(--dark);font-size:13px;padding-left:0;border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator>div{display:flex;flex-direction:column;align-items:center}.kalendar-wrapper.gstyle .day-indicator.is-before{color:#757575}.kalendar-wrapper.gstyle .day-indicator .number-date{margin-left:0;margin-right:0;order:2;font-size:25px;font-weight:500;width:46px;height:46px;border-radius:100%;align-items:center;justify-content:center;display:flex;margin-top:4px}.kalendar-wrapper.gstyle .day-indicator.today{border-bottom-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator.today:after{display:none}.kalendar-wrapper.gstyle .day-indicator.today .number-date{background-color:var(--main-color);color:#fff}.kalendar-wrapper.gstyle .day-indicator .letters-date{margin-left:0;margin-right:0;font-weight:500;text-transform:uppercase;font-size:11px}.kalendar-wrapper.gstyle .day-indicator:first-child{position:relative}.kalendar-wrapper.gstyle .day-indicator:first-child::before{content:\"\";position:absolute;left:-1px;top:0;width:1px;height:100%;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .creating-event,.kalendar-wrapper.gstyle .popup-wrapper{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.kalendar-wrapper.non-desktop .building-blocks{pointer-events:none}.kalendar-wrapper.day-view .day-indicator{align-items:flex-start;text-align:center;padding-left:10px}.created-event,.creating-event{padding:4px 6px;cursor:default;word-break:break-word;height:100%;width:100%;font-size:14px}.created-event h4,.creating-event h4{font-weight:400}.creating-event{background-color:#34aadc;opacity:.9}.creating-event>*{text-shadow:0 0 7px rgba(0,0,0,.25)}.created-event{background-color:#bfecff;opacity:.74;border-left:solid 3px #34aadc;color:#1f6570}.week-navigator{display:flex;align-items:center;background:linear-gradient(#fdfdfd,#f9f9f9);border-bottom:solid 1px #ec4d3d;padding:10px 20px}.week-navigator .nav-wrapper{display:flex;align-items:center;justify-content:space-between;font-size:22px;width:25ch;max-width:30ch;margin:0 auto}.week-navigator .nav-wrapper span{white-space:nowrap}.week-navigator button{background:0 0;border:none;padding:0;display:inline-flex;margin:0 10px;color:#ec4d3d;align-items:center;font-size:14px;padding-bottom:5px}.kalendar-wrapper{background-color:#fff;min-width:300px}.no-scroll{overflow-y:hidden;max-height:100%}.hour-indicator-line{position:absolute;z-index:2;width:100%;height:10px;display:flex;align-items:center;pointer-events:none;user-select:none}.hour-indicator-line>span.line{background-color:var(--main-color);height:1px;display:block;flex:1}.hour-indicator-line>span.time-value{font-size:14px;width:48px;color:var(--main-color);font-weight:600;background-color:#fff}.hour-indicator-tooltip{position:absolute;z-index:0;background-color:var(--main-color);width:10px;height:10px;display:block;border-radius:100%;pointer-events:none;user-select:none}ul.kalendar-day li.kalendar-cell:last-child{display:none}.week-navigator-button{outline:0}.week-navigator-button:active svg,.week-navigator-button:hover svg{stroke:var(--main-color)}",
+  inject("data-v-dfda88c0_0", {
+    source: "* {\n  box-sizing: border-box;\n}\n.kalendar-wrapper {\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\";\n  --main-color: #ec4d3d;\n  --weekend-color: #f7f7f7;\n  --current-day-color: #fef4f4;\n  --table-cell-border-color: #e5e5e5;\n  --odd-cell-border-color: #e5e5e5;\n  --hour-row-color: inherit;\n  --dark: #212121;\n  --lightg: #9e9e9e;\n  --card-bgcolor: #4285f4;\n  --card-color: white;\n  --max-hours: 10;\n  --previous-events: #c6dafc;\n  --previous-text-color: #727d8f;\n}\n.kalendar-wrapper.gstyle {\n  --hour-row-color: #212121;\n  --main-color: #4285f4;\n  --weekend-color: transparent;\n  --current-day-color: transparent;\n  --table-cell-border-color: #e0e0e0;\n  --odd-cell-border-color: transparent;\n  font-family: \"Google Sans\", Roboto, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Arial, sans-serif;\n}\n.kalendar-wrapper.gstyle .week-navigator {\n  background: white;\n  border-bottom: none;\n  padding: 20px;\n  color: rgba(0, 0, 0, 0.54);\n}\n.kalendar-wrapper.gstyle .week-navigator button {\n  color: rgba(0, 0, 0, 0.54);\n}\n.kalendar-wrapper.gstyle .creating-event,\n.kalendar-wrapper.gstyle .created-event {\n  background-color: var(--card-bgcolor);\n  color: var(--card-color);\n  text-shadow: none;\n  border-left: none;\n  border-radius: 2px;\n  opacity: 1;\n  border-bottom: solid 1px rgba(0, 0, 0, 0.03);\n}\n.kalendar-wrapper.gstyle .creating-event > *,\n.kalendar-wrapper.gstyle .created-event > * {\n  text-shadow: none;\n}\n.kalendar-wrapper.gstyle .is-past .creating-event,\n.kalendar-wrapper.gstyle .is-past .created-event {\n  background-color: var(--previous-events);\n  color: var(--previous-text-color);\n}\n.kalendar-wrapper.gstyle .created-event {\n  width: 96%;\n}\n.kalendar-wrapper.gstyle .created-event .time {\n  right: 2px;\n}\n.kalendar-wrapper.gstyle .sticky-top .days {\n  margin-left: 0;\n  padding-left: 55px;\n}\n.kalendar-wrapper.gstyle .all-day {\n  display: none;\n}\n.kalendar-wrapper.gstyle ul.building-blocks.day-1 li.is-an-hour::before {\n  content: \"\";\n  position: absolute;\n  bottom: -1px;\n  left: -10px;\n  width: 10px;\n  height: 1px;\n  background-color: var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle ul.building-blocks li,\n.kalendar-wrapper.gstyle .hours {\n  border-right: solid 1px var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle .hours li {\n  font-size: 80%;\n}\n.kalendar-wrapper.gstyle .hour-indicator-line > span.line {\n  height: 2px;\n  background-color: #db4437;\n}\n.kalendar-wrapper.gstyle .hour-indicator-line > span.line:before {\n  content: \"\";\n  width: 12px;\n  height: 12px;\n  display: block;\n  background-color: #db4437;\n  position: absolute;\n  top: -1px;\n  left: 0;\n  border-radius: 100%;\n}\n.kalendar-wrapper.gstyle .days {\n  border-top: solid 1px var(--table-cell-border-color);\n  position: relative;\n}\n.kalendar-wrapper.gstyle .days:before {\n  content: \"\";\n  position: absolute;\n  height: 1px;\n  width: 55px;\n  left: 0;\n  bottom: 0;\n  background-color: var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle .day-indicator {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  color: var(--dark);\n  font-size: 13px;\n  padding-left: 0px;\n  border-right: solid 1px var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle .day-indicator > div {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n}\n.kalendar-wrapper.gstyle .day-indicator.is-before {\n  color: #757575;\n}\n.kalendar-wrapper.gstyle .day-indicator .number-date {\n  margin-left: 0px;\n  margin-right: 0px;\n  order: 2;\n  font-size: 25px;\n  font-weight: 500;\n  width: 46px;\n  height: 46px;\n  border-radius: 100%;\n  align-items: center;\n  justify-content: center;\n  display: flex;\n  margin-top: 4px;\n}\n.kalendar-wrapper.gstyle .day-indicator.today {\n  border-bottom-color: var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle .day-indicator.today:after {\n  display: none;\n}\n.kalendar-wrapper.gstyle .day-indicator.today .number-date {\n  background-color: var(--main-color);\n  color: white;\n}\n.kalendar-wrapper.gstyle .day-indicator .letters-date {\n  margin-left: 0px;\n  margin-right: 0px;\n  font-weight: 500;\n  text-transform: uppercase;\n  font-size: 11px;\n}\n.kalendar-wrapper.gstyle .day-indicator:first-child {\n  position: relative;\n}\n.kalendar-wrapper.gstyle .day-indicator:first-child::before {\n  content: \"\";\n  position: absolute;\n  left: -1px;\n  top: 0;\n  width: 1px;\n  height: 100%;\n  background-color: var(--table-cell-border-color);\n}\n.kalendar-wrapper.gstyle .creating-event,\n.kalendar-wrapper.gstyle .popup-wrapper {\n  box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.2);\n  transition: opacity 100ms linear;\n}\n.kalendar-wrapper.non-desktop .building-blocks {\n  pointer-events: none;\n}\n.kalendar-wrapper.day-view .day-indicator {\n  align-items: flex-start;\n  text-align: center;\n  padding-left: 10px;\n}\n.creating-event,\n.created-event {\n  padding: 4px 6px;\n  cursor: default;\n  word-break: break-word;\n  height: 100%;\n  width: 100%;\n  font-size: 14px;\n}\n.creating-event h4,\n.created-event h4 {\n  font-weight: 400;\n}\n.creating-event {\n  background-color: #34aadc;\n  opacity: 0.9;\n}\n.creating-event > * {\n  text-shadow: 0 0 7px rgba(0, 0, 0, 0.25);\n}\n.created-event {\n  background-color: #bfecff;\n  opacity: 0.74;\n  border-left: solid 3px #34aadc;\n  color: #1f6570;\n}\n.week-navigator {\n  display: flex;\n  align-items: center;\n  background: linear-gradient(#fdfdfd, #f9f9f9);\n  border-bottom: solid 1px #ec4d3d;\n  padding: 10px 20px;\n}\n.week-navigator .nav-wrapper {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  font-size: 22px;\n  width: 25ch;\n  max-width: 30ch;\n  margin: 0 auto;\n}\n.week-navigator .nav-wrapper span {\n  white-space: nowrap;\n}\n.week-navigator button {\n  background: transparent;\n  border: none;\n  padding: 0px;\n  display: inline-flex;\n  margin: 0px 10px;\n  color: #ec4d3d;\n  align-items: center;\n  font-size: 14px;\n  padding-bottom: 5px;\n}\n.kalendar-wrapper {\n  background-color: white;\n  min-width: 300px;\n}\n.no-scroll {\n  overflow-y: hidden;\n  max-height: 100%;\n}\n.hour-indicator-line {\n  position: absolute;\n  z-index: 2;\n  width: 100%;\n  height: 10px;\n  display: flex;\n  align-items: center;\n  pointer-events: none;\n  user-select: none;\n}\n.hour-indicator-line > span.line {\n  background-color: var(--main-color);\n  height: 1px;\n  display: block;\n  flex: 1;\n}\n.hour-indicator-line > span.time-value {\n  font-size: 14px;\n  width: 48px;\n  color: var(--main-color);\n  font-weight: 600;\n  background-color: white;\n}\n.hour-indicator-tooltip {\n  position: absolute;\n  z-index: 0;\n  background-color: var(--main-color);\n  width: 10px;\n  height: 10px;\n  display: block;\n  border-radius: 100%;\n  pointer-events: none;\n  user-select: none;\n}\nul.kalendar-day li.kalendar-cell:last-child {\n  display: none;\n}\n.week-navigator-button {\n  outline: 0;\n}\n.week-navigator-button:hover svg, .week-navigator-button:active svg {\n  stroke: var(--main-color);\n}",
     map: undefined,
     media: undefined
   });
