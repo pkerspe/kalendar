@@ -24,10 +24,10 @@ You can run the demo locally :
 
 ## 🏁Getting Started
 
--   Install plugin and its dependencies from npm
+-   Install plugin from npm
 
 ```
-npm install kalendar-vue portal-vue -S
+npm install kalendar-vue -S
 ```
 
 -   The easiest option is to copy the demo app from `src/serve-dev.vue` into your project and start from that.
@@ -38,8 +38,6 @@ Step by Step:
 
 ```js
 import Vue from "vue";
-import PortalVue from "portal-vue";
-Vue.use(PortalVue);
 
 import { Kalendar } from 'kalendar-vue';
 ...
