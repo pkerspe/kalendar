@@ -225,7 +225,7 @@ var formatAMPM = function formatAMPM(date) {
 var script = {
   components: {
     KalendarWeekView: function KalendarWeekView() {
-      return import('./kalendar-weekview-84fb29ed.js');
+      return import('./kalendar-weekview-0c38350a.js');
     }
   },
   props: {
@@ -352,6 +352,14 @@ var script = {
   created: function created() {
     var _this2 = this;
 
+    //create an event bus to communicate with all ancestor components
+    window.calendarEventBus = new Vue();
+    calendarEventBus.$on('closePopupsEvent', function (data) {
+      return _this2.closePopups(data);
+    });
+    calendarEventBus.$on('addAppointmentEvent', function (information) {
+      return _this2.addAppointment(information);
+    });
     this.current_day = this.kalendar_options.start_day;
     this.kalendar_events = this.events.map(function (event) {
       return _objectSpread2(_objectSpread2({}, event), {}, {
@@ -511,6 +519,59 @@ function normalizeComponent(template, style, script, scopeId, isFunctionalTempla
     return script;
 }
 
+const isOldIE = typeof navigator !== 'undefined' &&
+    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+function createInjector(context) {
+    return (id, style) => addStyle(id, style);
+}
+let HEAD;
+const styles = {};
+function addStyle(id, css) {
+    const group = isOldIE ? css.media || 'default' : id;
+    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
+    if (!style.ids.has(id)) {
+        style.ids.add(id);
+        let code = css.source;
+        if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+                '\n/*# sourceMappingURL=data:application/json;base64,' +
+                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+                    ' */';
+        }
+        if (!style.element) {
+            style.element = document.createElement('style');
+            style.element.type = 'text/css';
+            if (css.media)
+                style.element.setAttribute('media', css.media);
+            if (HEAD === undefined) {
+                HEAD = document.head || document.getElementsByTagName('head')[0];
+            }
+            HEAD.appendChild(style.element);
+        }
+        if ('styleSheet' in style.element) {
+            style.styles.push(code);
+            style.element.styleSheet.cssText = style.styles
+                .filter(Boolean)
+                .join('\n');
+        }
+        else {
+            const index = style.ids.size - 1;
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index])
+                style.element.removeChild(nodes[index]);
+            if (nodes.length)
+                style.element.insertBefore(textNode, nodes[index]);
+            else
+                style.element.appendChild(textNode);
+        }
+    }
+}
+
 /* script */
 var __vue_script__ = script;
 /* template */
@@ -644,142 +705,31 @@ var __vue_render__ = function __vue_render__() {
   })])])]) : _vm._e()]), _vm._v(" "), _c('kalendar-week-view', {
     attrs: {
       "current_day": _vm.current_day
-    }
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-creation"
     },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "creating-event"
-        }, [_vm._t("creating-card", [_c('h4', {
-          staticClass: "appointment-title",
-          staticStyle: {
-            "text-align": "left"
-          }
-        }, [_vm._v("New Appointment")]), _vm._v(" "), _c('span', {
-          staticClass: "time"
-        }, [_vm._v(_vm._s(_vm.getTime(information.start_time)) + " - " + _vm._s(_vm.getTime(information.end_time)))])], {
-          "event_information": information
-        })], 2);
-      }
-    }], null, true)
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-popup-form"
-    },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "popup-event"
-        }, [_vm._t("popup-form", [_c('h4', {
-          staticStyle: {
-            "margin-bottom": "10px"
-          }
-        }, [_vm._v("New Appointment")]), _vm._v(" "), _c('input', {
-          directives: [{
-            name: "model",
-            rawName: "v-model",
-            value: _vm.new_appointment['title'],
-            expression: "new_appointment['title']"
-          }],
-          staticStyle: {
-            "width": "100%"
-          },
-          attrs: {
-            "type": "text",
-            "name": "title",
-            "placeholder": "Title"
-          },
-          domProps: {
-            "value": _vm.new_appointment['title']
-          },
-          on: {
-            "input": function input($event) {
-              if ($event.target.composing) {
-                return;
-              }
-
-              _vm.$set(_vm.new_appointment, 'title', $event.target.value);
-            }
-          }
-        }), _vm._v(" "), _c('textarea', {
-          directives: [{
-            name: "model",
-            rawName: "v-model",
-            value: _vm.new_appointment['description'],
-            expression: "new_appointment['description']"
-          }],
-          attrs: {
-            "type": "text",
-            "name": "description",
-            "placeholder": "Description",
-            "rows": "2"
-          },
-          domProps: {
-            "value": _vm.new_appointment['description']
-          },
-          on: {
-            "input": function input($event) {
-              if ($event.target.composing) {
-                return;
-              }
-
-              _vm.$set(_vm.new_appointment, 'description', $event.target.value);
-            }
-          }
-        }), _vm._v(" "), _c('div', {
-          staticClass: "buttons"
-        }, [_c('button', {
-          staticClass: "cancel",
-          on: {
-            "click": function click($event) {
-              return _vm.closePopups();
-            }
-          }
-        }, [_vm._v("Cancel")]), _vm._v(" "), _c('button', {
-          on: {
-            "click": function click($event) {
-              return _vm.addAppointment(information);
-            }
-          }
-        }, [_vm._v("Save")])])], {
-          "popup_information": information
-        })], 2);
-      }
-    }], null, true)
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-details"
-    },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "created-event"
-        }, [_vm._t("created-card", [_c('h4', {
-          staticStyle: {
-            "margin-bottom": "5px"
-          }
-        }, [_vm._v(_vm._s(information.data))]), _vm._v(" "), _c('p', [_vm._v("\n                    " + _vm._s(information.start_time.substr(11, 5)) + " -\n                    " + _vm._s(information.end_time.substr(11, 5)) + "\n                ")])], {
-          "event_information": information
-        })], 2);
-      }
-    }], null, true)
+    scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+      return {
+        key: slot,
+        fn: function fn(scope) {
+          return [_vm._t(slot, null, null, scope)];
+        }
+      };
+    })], null, true)
   })], 1);
 };
 
 var __vue_staticRenderFns__ = [];
 /* style */
 
-var __vue_inject_styles__ = undefined;
+var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
+  if (!inject) return;
+  inject("data-v-d2ebffc6_0", {
+    source: "*{box-sizing:border-box}.kalendar-wrapper{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\";min-height:1440px;--main-color:#ec4d3d;--weekend-color:#f7f7f7;--current-day-color:#fef4f4;--table-cell-border-color:#e5e5e5;--odd-cell-border-color:#e5e5e5;--hour-row-color:inherit;--dark:#212121;--lightg:#9e9e9e;--card-bgcolor:#4285f4;--card-color:white;--max-hours:10;--previous-events:#c6dafc;--previous-text-color:#727d8f}.kalendar-wrapper.gstyle{--hour-row-color:#212121;--main-color:#4285f4;--weekend-color:transparent;--current-day-color:transparent;--table-cell-border-color:#e0e0e0;--odd-cell-border-color:transparent;font-family:\"Google Sans\",Roboto,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Arial,sans-serif}.kalendar-wrapper.gstyle .week-navigator{background:#fff;border-bottom:none;padding:20px;color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .week-navigator button{color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .created-event,.kalendar-wrapper.gstyle .creating-event{background-color:var(--card-bgcolor);color:var(--card-color);text-shadow:none;border-left:none;border-radius:2px;opacity:1;border-bottom:solid 1px rgba(0,0,0,.03)}.kalendar-wrapper.gstyle .created-event>*,.kalendar-wrapper.gstyle .creating-event>*{text-shadow:none}.kalendar-wrapper.gstyle .is-past .created-event,.kalendar-wrapper.gstyle .is-past .creating-event{background-color:var(--previous-events);color:var(--previous-text-color)}.kalendar-wrapper.gstyle .created-event{width:96%}.kalendar-wrapper.gstyle .created-event .time{right:2px}.kalendar-wrapper.gstyle .sticky-top .days{margin-left:0;padding-left:55px}.kalendar-wrapper.gstyle .all-day{display:none}.kalendar-wrapper.gstyle ul.building-blocks.day-1 li.is-an-hour::before{content:\"\";position:absolute;bottom:-1px;left:-10px;width:10px;height:1px;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours,.kalendar-wrapper.gstyle ul.building-blocks li{border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours li{font-size:80%}.kalendar-wrapper.gstyle .hour-indicator-line>span.line{height:2px;background-color:#db4437}.kalendar-wrapper.gstyle .hour-indicator-line>span.line:before{content:\"\";width:12px;height:12px;display:block;background-color:#db4437;position:absolute;top:-1px;left:0;border-radius:100%}.kalendar-wrapper.gstyle .days{border-top:solid 1px var(--table-cell-border-color);position:relative}.kalendar-wrapper.gstyle .days:before{content:\"\";position:absolute;height:1px;width:55px;left:0;bottom:0;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator{display:flex;flex-direction:column;align-items:center;color:var(--dark);font-size:13px;padding-left:0;border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator>div{display:flex;flex-direction:column;align-items:center}.kalendar-wrapper.gstyle .day-indicator.is-before{color:#757575}.kalendar-wrapper.gstyle .day-indicator .number-date{margin-left:0;margin-right:0;order:2;font-size:25px;font-weight:500;width:46px;height:46px;border-radius:100%;align-items:center;justify-content:center;display:flex;margin-top:4px}.kalendar-wrapper.gstyle .day-indicator.today{border-bottom-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator.today:after{display:none}.kalendar-wrapper.gstyle .day-indicator.today .number-date{background-color:var(--main-color);color:#fff}.kalendar-wrapper.gstyle .day-indicator .letters-date{margin-left:0;margin-right:0;font-weight:500;text-transform:uppercase;font-size:11px}.kalendar-wrapper.gstyle .day-indicator:first-child{position:relative}.kalendar-wrapper.gstyle .day-indicator:first-child::before{content:\"\";position:absolute;left:-1px;top:0;width:1px;height:100%;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .creating-event,.kalendar-wrapper.gstyle .popup-wrapper{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.kalendar-wrapper.non-desktop .building-blocks{pointer-events:none}.kalendar-wrapper.day-view .day-indicator{align-items:flex-start;text-align:center;padding-left:10px}.created-event,.creating-event{padding:4px 6px;cursor:default;word-break:break-word;height:100%;width:100%;font-size:14px}.created-event h4,.creating-event h4{font-weight:400}.creating-event{background-color:#34aadc;opacity:.9}.creating-event>*{text-shadow:0 0 7px rgba(0,0,0,.25)}.created-event{background-color:#bfecff;opacity:.74;border-left:solid 3px #34aadc;color:#1f6570}.week-navigator{display:flex;align-items:center;background:linear-gradient(#fdfdfd,#f9f9f9);border-bottom:solid 1px #ec4d3d;padding:10px 20px}.week-navigator .nav-wrapper{display:flex;align-items:center;justify-content:space-between;font-size:22px;width:25ch;max-width:30ch;margin:0 auto}.week-navigator .nav-wrapper span{white-space:nowrap}.week-navigator button{background:0 0;border:none;padding:0;display:inline-flex;margin:0 10px;color:#ec4d3d;align-items:center;font-size:14px;padding-bottom:5px}.kalendar-wrapper{background-color:#fff;min-width:300px}.no-scroll{overflow-y:hidden;max-height:100%}.hour-indicator-line{position:absolute;z-index:2;width:100%;height:10px;display:flex;align-items:center;pointer-events:none;user-select:none}.hour-indicator-line>span.line{background-color:var(--main-color);height:1px;display:block;flex:1}.hour-indicator-line>span.time-value{font-size:14px;width:48px;color:var(--main-color);font-weight:600;background-color:#fff}.hour-indicator-tooltip{position:absolute;z-index:0;background-color:var(--main-color);width:10px;height:10px;display:block;border-radius:100%;pointer-events:none;user-select:none}ul.kalendar-day li.kalendar-cell:last-child{display:none}.week-navigator-button{outline:0}.week-navigator-button:active svg,.week-navigator-button:hover svg{stroke:var(--main-color)}",
+    map: undefined,
+    media: undefined
+  });
+};
 /* scoped */
+
 
 var __vue_scope_id__ = undefined;
 /* module identifier */
@@ -788,8 +738,6 @@ var __vue_module_identifier__ = undefined;
 /* functional template */
 
 var __vue_is_functional_template__ = false;
-/* style inject */
-
 /* style inject SSR */
 
 /* style inject shadow dom */
@@ -797,7 +745,7 @@ var __vue_is_functional_template__ = false;
 var __vue_component__ = /*#__PURE__*/normalizeComponent({
   render: __vue_render__,
   staticRenderFns: __vue_staticRenderFns__
-}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);
+}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, createInjector, undefined, undefined);
 
 /* eslint-disable import/prefer-default-export */
 
@@ -839,4 +787,4 @@ if (GlobalVue) {
   GlobalVue.use(plugin);
 } // Default export is library as a whole, registered via Vue.use()
 
-export { __vue_component__ as _, isToday as a, _objectSpread2 as b, cloneObject as c, normalizeComponent as d, isBefore as e, getHourlessDate as f, getLocaleTime as g, addTimezoneInfo as h, isWeekend as i, plugin as p };
+export { __vue_component__ as _, isToday as a, _objectSpread2 as b, cloneObject as c, normalizeComponent as d, createInjector as e, isBefore as f, getLocaleTime as g, getHourlessDate as h, isWeekend as i, addTimezoneInfo as j, plugin as p };

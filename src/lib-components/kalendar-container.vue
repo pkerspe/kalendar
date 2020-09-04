@@ -5,9 +5,7 @@
          @touchend="scrollable = true"
     >
         <div class="week-navigator">
-            <div class="nav-wrapper"
-                 v-if="kalendar_options.view_type === 'week'"
-            >
+            <div class="nav-wrapper" v-if="kalendar_options.view_type === 'week'">
                 <button class="week-navigator-button" @click="changeDay(-7)">
                     <svg style="transform: rotate(180deg)"
                          viewBox="0 0 24 24"
@@ -76,19 +74,18 @@
                 </button>
             </div>
         </div>
-        <kalendar-week-view :current_day="current_day"/>
-        <portal to="event-creation" class="slotable">
-            <div slot-scope="information" class="creating-event">
-                <slot name="creating-card" :event_information="information">
-                    <h4 class="appointment-title" style="text-align: left;">New Appointment</h4>
-                    <span class="time">{{ getTime(information.start_time) }} - {{ getTime(information.end_time) }}</span>
-                </slot>
-            </div>
-        </portal>
+
+        <kalendar-week-view :current_day="current_day">
+            <!-- inherit slots to child component -->
+            <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+                <slot :name="slot" v-bind="scope"/>
+            </template>
+        </kalendar-week-view>
+<!--
         <portal to="event-popup-form" class="slotable">
             <div slot-scope="information" class="popup-event">
                 <slot name="popup-form" :popup_information="information">
-                    <h4 style="margin-bottom: 10px">New Appointment</h4>
+                    <h4 style="margin-bottom: 10px">New Appointment 2</h4>
                     <input
                             v-model="new_appointment['title']"
                             type="text"
@@ -108,11 +105,12 @@
                     </div>
                 </slot>
             </div>
-        </portal>
+        </portal>-->
+<!--
         <portal to="event-details" class="slotable">
             <div slot-scope="information" class="created-event">
                 <slot name="created-card" :event_information="information">
-                    <h4 style="margin-bottom: 5px">{{ information.data }}</h4>
+                    <h4 style="margin-bottom: 5px">{{ information.data }} XY</h4>
                     <p>
                         {{ information.start_time.substr(11, 5) }} -
                         {{ information.end_time.substr(11, 5) }}
@@ -120,6 +118,7 @@
                 </slot>
             </div>
         </portal>
+        -->
     </div>
 </template>
 <script>
@@ -240,6 +239,11 @@
             },
         },
         created() {
+            //create an event bus to communicate with all ancestor components
+            window.calendarEventBus = new Vue();
+            calendarEventBus.$on('closePopupsEvent', data => this.closePopups(data));
+            calendarEventBus.$on('addAppointmentEvent', information => this.addAppointment(information));
+
             this.current_day = this.kalendar_options.start_day;
             this.kalendar_events = this.events.map(event => ({
                 ...event,

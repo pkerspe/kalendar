@@ -1,13 +1,8 @@
 <template>
-    <ul
-            style="position: relative;"
-            :class="{
-      'is-weekend': isWeekend,
-      'is-today': isToday,
-      creating: creator.creating || creator.status === 'popup-initiated'
-    }"
-            class="kalendar-day"
-            :ref="day.value + '-reference'"
+    <ul style="position: relative;"
+        :class="{'is-weekend': isWeekend,'is-today': isToday,creating: creator.creating || creator.status === 'popup-initiated'}"
+        class="kalendar-day"
+        :ref="day.value + '-reference'"
     >
         <div ref="nowIndicator"
              :class="kalendar_options.style === 'material_design' ? 'hour-indicator-line' : 'hour-indicator-tooltip' "
@@ -27,7 +22,12 @@
                 @reset="resetEvents()"
                 @initiatePopup="initiatePopup()"
                 :temporary-event="temporary_event"
-        />
+        >
+            <!-- inherit slots to child component -->
+            <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+                <slot :name="slot" v-bind="scope"/>
+            </template>
+        </kalendar-cell>
     </ul>
 </template>
 <script>

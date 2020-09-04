@@ -1,6 +1,6 @@
 <template>
     <div
-            class="new-card event-card {{customCalendarEventClass}}"
+            class="event-card"
             :ref="`kalendarEventRef-${event.id}`"
             :style="
             `
@@ -12,34 +12,52 @@
         "
             @click="inspecting = true"
             @mouseleave="inspecting = false"
-            :class="{
-            'is-past': isPast,
-            overlaps: overlaps > 0,
-            'two-in-one': total > 1,
-            inspecting: !!inspecting,
-            'event-card__mini': event.distance <= 10,
-            'event-card__small': (event.distance > 10 && event.distance < 40) || overlaps > 1,
-            customCalendarEventClass
-        }"
+            :class="eventCardClasses"
     >
-        <portal-target
-                v-if="status === 'creating' || status === 'popup-initiated'"
-                :slot-props="information"
-                name="event-creation"
-                slim
-        />
-        <portal-target
-                v-else
-                name="event-details"
-                :slot-props="information"
-                slim
-        />
+        <template v-if="status === 'creating' || status === 'popup-initiated'">
+            <div class="creating-event">
+                <slot name="creating-card" v-bind:event_information="information">
+                    <h4 class="appointment-title" style="text-align: left;">New Appointment 1</h4>
+                    <span class="time">{{ new Date(information.start_time).toLocaleTimeString().substring(0,5) }} - {{ new Date(information.end_time).toLocaleTimeString().substring(0,5) }}</span>
+                </slot>
+            </div>
+        </template>
+
+        <template v-else>
+            <div class="created-event">
+                <slot name="created-card" v-bind:event_information="information">
+                    <h4 style="margin-bottom: 5px">{{ information.data }} XY</h4>
+                    <p>
+                        {{ information.start_time.substr(11, 5) }} -
+                        {{ information.end_time.substr(11, 5) }}
+                    </p>
+                </slot>
+            </div>
+        </template>
+
         <div v-if="status === 'popup-initiated'" class="popup-wrapper">
-            <portal-target
-                    name="event-popup-form"
-                    slim
-                    :slot-props="information"
-            />
+            <div class="popup-event">
+                <slot name="event-popup-form" :popup_information="information">
+                    <h4 style="margin-bottom: 10px">New Appointment</h4>
+                    <input
+                            v-model="new_appointment['title']"
+                            type="text"
+                            name="title"
+                            placeholder="Title"
+                            style="width: 100%;"
+                    />
+                    <textarea v-model="new_appointment['description']"
+                              type="text"
+                              name="description"
+                              placeholder="Description"
+                              rows="2"
+                    ></textarea>
+                    <div class="buttons">
+                        <button class="cancel" @click="closePopups()">Cancel</button>
+                        <button @click="addAppointment(information)">Save</button>
+                    </div>
+                </slot>
+            </div>
         </div>
     </div>
 </template>
@@ -54,12 +72,36 @@
         data: () => ({
             inspecting: false,
             editing: false,
+            new_appointment: {},
         }),
+        methods: {
+            addAppointment: function(information){
+                window.calendarEventBus.$emit('addAppointmentEvent', information);
+            },
+            closePopups: function(){
+                window.calendarEventBus.$emit('closePopupsEvent');
+            }
+        },
         computed: {
+            eventCardClasses() {
+                let props = {
+                    'is-past': this.isPast,
+                    overlaps: this.overlaps > 0,
+                    'two-in-one': this.total > 1,
+                    inspecting: !!this.inspecting,
+                    'event-card__mini': this.event.distance <= 10,
+                    'event-card__small': (this.event.distance > 10 && this.event.distance < 40) || this.overlaps > 1
+                };
+                if (this.customCalendarEventClass != "") {
+                    props[this.customCalendarEventClass] = true;
+                }
+                console.log(props);
+                return props;
+            },
             customCalendarEventClass() {
-                if (!this.event) return '';
-                if (!this.event['customEventCardClass']) return '';
-                return this.event['customEventCardClass'];
+                console.log(this.event);
+                if (!this.event || !this.event.data || !this.event.data.customEventCardClass) return '';
+                return this.event.data.customEventCardClass + '';
             },
             isPast() {
                 let now = getLocaleTime(new Date().toISOString());

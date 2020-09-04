@@ -1,6 +1,5 @@
-import { g as getLocaleTime, e as isBefore, h as addTimezoneInfo, d as __vue_normalize__ } from './index-1d9e2343.js';
+import { g as getLocaleTime, f as isBefore, j as addTimezoneInfo, d as __vue_normalize__, e as __vue_create_injector__ } from './index-da5b199b.js';
 import 'vue';
-import { a as __vue_create_injector__ } from './kalendar-weekview-b2424cb7.js';
 
 //
 var script = {
@@ -10,8 +9,17 @@ var script = {
   data: function data() {
     return {
       inspecting: false,
-      editing: false
+      editing: false,
+      new_appointment: {}
     };
+  },
+  methods: {
+    addAppointment: function addAppointment(information) {
+      window.calendarEventBus.$emit('addAppointmentEvent', information);
+    },
+    closePopups: function closePopups() {
+      window.calendarEventBus.$emit('closePopupsEvent');
+    }
   },
   computed: {
     eventCardClasses: function eventCardClasses() {
@@ -105,27 +113,103 @@ var __vue_render__ = function __vue_render__() {
         _vm.inspecting = false;
       }
     }
-  }, [_vm.status === 'creating' || _vm.status === 'popup-initiated' ? _c('portal-target', {
-    attrs: {
-      "slot-props": _vm.information,
-      "name": "event-creation",
-      "slim": ""
+  }, [_vm.status === 'creating' || _vm.status === 'popup-initiated' ? [_c('div', {
+    staticClass: "creating-event"
+  }, [_vm._t("creating-card", [_c('h4', {
+    staticClass: "appointment-title",
+    staticStyle: {
+      "text-align": "left"
     }
-  }) : _c('portal-target', {
-    attrs: {
-      "name": "event-details",
-      "slot-props": _vm.information,
-      "slim": ""
+  }, [_vm._v("New Appointment 1")]), _vm._v(" "), _c('span', {
+    staticClass: "time"
+  }, [_vm._v(_vm._s(new Date(_vm.information.start_time).toLocaleTimeString().substring(0, 5)) + " - " + _vm._s(new Date(_vm.information.end_time).toLocaleTimeString().substring(0, 5)))])], {
+    "event_information": _vm.information
+  })], 2)] : [_c('div', {
+    staticClass: "created-event"
+  }, [_vm._t("created-card", [_c('h4', {
+    staticStyle: {
+      "margin-bottom": "5px"
     }
-  }), _vm._v(" "), _vm.status === 'popup-initiated' ? _c('div', {
+  }, [_vm._v(_vm._s(_vm.information.data) + " XY")]), _vm._v(" "), _c('p', [_vm._v("\n                    " + _vm._s(_vm.information.start_time.substr(11, 5)) + " -\n                    " + _vm._s(_vm.information.end_time.substr(11, 5)) + "\n                ")])], {
+    "event_information": _vm.information
+  })], 2)], _vm._v(" "), _vm.status === 'popup-initiated' ? _c('div', {
     staticClass: "popup-wrapper"
-  }, [_c('portal-target', {
-    attrs: {
-      "name": "event-popup-form",
-      "slim": "",
-      "slot-props": _vm.information
+  }, [_c('div', {
+    staticClass: "popup-event"
+  }, [_vm._t("event-popup-form", [_c('h4', {
+    staticStyle: {
+      "margin-bottom": "10px"
     }
-  })], 1) : _vm._e()], 1);
+  }, [_vm._v("New Appointment")]), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.new_appointment['title'],
+      expression: "new_appointment['title']"
+    }],
+    staticStyle: {
+      "width": "100%"
+    },
+    attrs: {
+      "type": "text",
+      "name": "title",
+      "placeholder": "Title"
+    },
+    domProps: {
+      "value": _vm.new_appointment['title']
+    },
+    on: {
+      "input": function input($event) {
+        if ($event.target.composing) {
+          return;
+        }
+
+        _vm.$set(_vm.new_appointment, 'title', $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _c('textarea', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.new_appointment['description'],
+      expression: "new_appointment['description']"
+    }],
+    attrs: {
+      "type": "text",
+      "name": "description",
+      "placeholder": "Description",
+      "rows": "2"
+    },
+    domProps: {
+      "value": _vm.new_appointment['description']
+    },
+    on: {
+      "input": function input($event) {
+        if ($event.target.composing) {
+          return;
+        }
+
+        _vm.$set(_vm.new_appointment, 'description', $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _c('div', {
+    staticClass: "buttons"
+  }, [_c('button', {
+    staticClass: "cancel",
+    on: {
+      "click": function click($event) {
+        return _vm.closePopups();
+      }
+    }
+  }, [_vm._v("Cancel")]), _vm._v(" "), _c('button', {
+    on: {
+      "click": function click($event) {
+        return _vm.addAppointment(_vm.information);
+      }
+    }
+  }, [_vm._v("Save")])])], {
+    "popup_information": _vm.information
+  })], 2)]) : _vm._e()], 2);
 };
 
 var __vue_staticRenderFns__ = [];
@@ -133,7 +217,7 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-62a3fbcc_0", {
+  inject("data-v-07dae51b_0", {
     source: ".event-card{display:flex;flex-direction:column;height:100%;width:100%;position:absolute;pointer-events:none;top:0;left:0;right:0;bottom:0;color:#fff;user-select:none;will-change:height}.event-card h4,.event-card p,.event-card span{margin:0}.event-card>*{flex:1;position:relative}.event-card.creating{z-index:-1}.event-card.overlaps>*{border:solid 1px #fff!important}.event-card.inspecting{z-index:11!important}.event-card.inspecting .created-event{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.event-card__mini .created-event>.details-card>*{display:none}.event-card__mini .appointment-title,.event-card__mini .time{display:block!important;position:absolute;top:0;font-size:9px;z-index:1;overflow:visible;height:100%}.event-card__small .appointment-title{font-size:80%}.event-card__small .time{font-size:70%}.event-card.two-in-one .details-card>*{font-size:60%}.event-card h1,.event-card h2,.event-card h3,.event-card h4,.event-card h5,.event-card h6,.event-card p{margin:0}.time{position:absolute;bottom:0;right:0;font-size:11px}.popup-wrapper{text-shadow:none;color:#000;z-index:10;position:absolute;top:0;left:calc(100% + 5px);display:flex;flex-direction:column;pointer-events:all;user-select:none;background-color:#fff;border:solid 1px rgba(0,0,0,.08);border-radius:4px;box-shadow:0 2px 12px -3px rgba(0,0,0,.3);padding:10px}.popup-wrapper h4{color:#000;font-weight:400}.popup-wrapper input,.popup-wrapper textarea{border:none;background-color:#ebebeb;color:#030303;border-radius:4px;padding:5px 8px;margin-bottom:5px}.created-event{pointer-events:all;position:relative}.created-event>.details-card{max-width:100%;width:100%;overflow:hidden;position:relative;white-space:nowrap;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}.created-event>.details-card h2,.created-event>.details-card h3,.created-event>.details-card h4,.created-event>.details-card p,.created-event>.details-card small,.created-event>.details-card span,.created-event>.details-card strong,.created-event>.details-card>h1{text-overflow:ellipsis;overflow:hidden;display:block}ul:last-child .popup-wrapper{left:auto;right:100%;margin-right:10px}.day-view ul .popup-wrapper{left:auto;right:auto;width:calc(100% - 10px);top:10px}",
     map: undefined,
     media: undefined

@@ -67,6 +67,10 @@
           :passed-time="(passedTime) ? passedTime.distance : null"
           :ref="day.value.slice(0, 10)"
         >
+          <!-- inherit slots to child component -->
+          <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+            <slot :name="slot" v-bind="scope"/>
+          </template>
         </kalendar-days>
       </div>
     </div>

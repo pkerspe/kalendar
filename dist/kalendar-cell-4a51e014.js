@@ -1,13 +1,12 @@
-import { g as getLocaleTime, c as cloneObject, b as _objectSpread2, d as __vue_normalize__ } from './index-1d9e2343.js';
+import { g as getLocaleTime, c as cloneObject, b as _objectSpread2, d as __vue_normalize__, e as __vue_create_injector__ } from './index-da5b199b.js';
 import 'vue';
-import { a as __vue_create_injector__ } from './kalendar-weekview-b2424cb7.js';
 
 var script = {
   props: ['creator', 'index', 'cellData', 'constructedEvents', 'temporaryEvent'],
   inject: ['kalendar_options'],
   components: {
     KalendarEvent: function KalendarEvent() {
-      return import('./kalendar-event-a132ce8f.js');
+      return import('./kalendar-event-926a7ead.js');
     }
   },
   computed: {
@@ -182,7 +181,15 @@ var __vue_render__ = function __vue_render__() {
         "total": _vm.cell_events.length,
         "index": eventIndex,
         "overlaps": _vm.overlapValue
-      }
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     }) : _vm._e();
   }), 1) : _vm._e();
 };
@@ -192,7 +199,7 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-bc1c5858_0", {
+  inject("data-v-2044d53b_0", {
     source: "li{font-size:13px;position:relative}.created-events{height:100%}ul.building-blocks li{z-index:0;border-bottom:dotted 1px var(--odd-cell-border-color)}ul.building-blocks li.first_of_appointment{z-index:1;opacity:1}ul.building-blocks li.is-an-hour{border-bottom:solid 1px var(--table-cell-border-color)}ul.building-blocks li.has-events{z-index:unset}ul.building-blocks li.being-created{z-index:11}",
     map: undefined,
     media: undefined

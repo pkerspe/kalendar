@@ -346,6 +346,14 @@ var formatAMPM = function formatAMPM(date) {
   created: function created() {
     var _this2 = this;
 
+    //create an event bus to communicate with all ancestor components
+    window.calendarEventBus = new Vue();
+    calendarEventBus.$on('closePopupsEvent', function (data) {
+      return _this2.closePopups(data);
+    });
+    calendarEventBus.$on('addAppointmentEvent', function (information) {
+      return _this2.addAppointment(information);
+    });
     this.current_day = this.kalendar_options.start_day;
     this.kalendar_events = this.events.map(function (event) {
       return _objectSpread2(_objectSpread2({}, event), {}, {
@@ -501,6 +509,57 @@ var formatAMPM = function formatAMPM(date) {
         }
     }
     return script;
+}const isOldIE = typeof navigator !== 'undefined' &&
+    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+function createInjector(context) {
+    return (id, style) => addStyle(id, style);
+}
+let HEAD;
+const styles = {};
+function addStyle(id, css) {
+    const group = isOldIE ? css.media || 'default' : id;
+    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
+    if (!style.ids.has(id)) {
+        style.ids.add(id);
+        let code = css.source;
+        if (css.map) {
+            // https://developer.chrome.com/devtools/docs/javascript-debugging
+            // this makes source maps inside style tags work properly in Chrome
+            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
+            // http://stackoverflow.com/a/26603875
+            code +=
+                '\n/*# sourceMappingURL=data:application/json;base64,' +
+                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
+                    ' */';
+        }
+        if (!style.element) {
+            style.element = document.createElement('style');
+            style.element.type = 'text/css';
+            if (css.media)
+                style.element.setAttribute('media', css.media);
+            if (HEAD === undefined) {
+                HEAD = document.head || document.getElementsByTagName('head')[0];
+            }
+            HEAD.appendChild(style.element);
+        }
+        if ('styleSheet' in style.element) {
+            style.styles.push(code);
+            style.element.styleSheet.cssText = style.styles
+                .filter(Boolean)
+                .join('\n');
+        }
+        else {
+            const index = style.ids.size - 1;
+            const textNode = document.createTextNode(code);
+            const nodes = style.element.childNodes;
+            if (nodes[index])
+                style.element.removeChild(nodes[index]);
+            if (nodes.length)
+                style.element.insertBefore(textNode, nodes[index]);
+            else
+                style.element.appendChild(textNode);
+        }
+    }
 }/* script */
 var __vue_script__ = script;
 /* template */
@@ -634,142 +693,31 @@ var __vue_render__ = function __vue_render__() {
   })])])]) : _vm._e()]), _vm._v(" "), _c('kalendar-week-view', {
     attrs: {
       "current_day": _vm.current_day
-    }
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-creation"
     },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "creating-event"
-        }, [_vm._t("creating-card", [_c('h4', {
-          staticClass: "appointment-title",
-          staticStyle: {
-            "text-align": "left"
-          }
-        }, [_vm._v("New Appointment")]), _vm._v(" "), _c('span', {
-          staticClass: "time"
-        }, [_vm._v(_vm._s(_vm.getTime(information.start_time)) + " - " + _vm._s(_vm.getTime(information.end_time)))])], {
-          "event_information": information
-        })], 2);
-      }
-    }], null, true)
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-popup-form"
-    },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "popup-event"
-        }, [_vm._t("popup-form", [_c('h4', {
-          staticStyle: {
-            "margin-bottom": "10px"
-          }
-        }, [_vm._v("New Appointment")]), _vm._v(" "), _c('input', {
-          directives: [{
-            name: "model",
-            rawName: "v-model",
-            value: _vm.new_appointment['title'],
-            expression: "new_appointment['title']"
-          }],
-          staticStyle: {
-            "width": "100%"
-          },
-          attrs: {
-            "type": "text",
-            "name": "title",
-            "placeholder": "Title"
-          },
-          domProps: {
-            "value": _vm.new_appointment['title']
-          },
-          on: {
-            "input": function input($event) {
-              if ($event.target.composing) {
-                return;
-              }
-
-              _vm.$set(_vm.new_appointment, 'title', $event.target.value);
-            }
-          }
-        }), _vm._v(" "), _c('textarea', {
-          directives: [{
-            name: "model",
-            rawName: "v-model",
-            value: _vm.new_appointment['description'],
-            expression: "new_appointment['description']"
-          }],
-          attrs: {
-            "type": "text",
-            "name": "description",
-            "placeholder": "Description",
-            "rows": "2"
-          },
-          domProps: {
-            "value": _vm.new_appointment['description']
-          },
-          on: {
-            "input": function input($event) {
-              if ($event.target.composing) {
-                return;
-              }
-
-              _vm.$set(_vm.new_appointment, 'description', $event.target.value);
-            }
-          }
-        }), _vm._v(" "), _c('div', {
-          staticClass: "buttons"
-        }, [_c('button', {
-          staticClass: "cancel",
-          on: {
-            "click": function click($event) {
-              return _vm.closePopups();
-            }
-          }
-        }, [_vm._v("Cancel")]), _vm._v(" "), _c('button', {
-          on: {
-            "click": function click($event) {
-              return _vm.addAppointment(information);
-            }
-          }
-        }, [_vm._v("Save")])])], {
-          "popup_information": information
-        })], 2);
-      }
-    }], null, true)
-  }), _vm._v(" "), _c('portal', {
-    staticClass: "slotable",
-    attrs: {
-      "to": "event-details"
-    },
-    scopedSlots: _vm._u([{
-      key: "default",
-      fn: function fn(information) {
-        return _c('div', {
-          staticClass: "created-event"
-        }, [_vm._t("created-card", [_c('h4', {
-          staticStyle: {
-            "margin-bottom": "5px"
-          }
-        }, [_vm._v(_vm._s(information.data))]), _vm._v(" "), _c('p', [_vm._v("\n                    " + _vm._s(information.start_time.substr(11, 5)) + " -\n                    " + _vm._s(information.end_time.substr(11, 5)) + "\n                ")])], {
-          "event_information": information
-        })], 2);
-      }
-    }], null, true)
+    scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+      return {
+        key: slot,
+        fn: function fn(scope) {
+          return [_vm._t(slot, null, null, scope)];
+        }
+      };
+    })], null, true)
   })], 1);
 };
 
 var __vue_staticRenderFns__ = [];
 /* style */
 
-var __vue_inject_styles__ = undefined;
+var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
+  if (!inject) return;
+  inject("data-v-d2ebffc6_0", {
+    source: "*{box-sizing:border-box}.kalendar-wrapper{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\";min-height:1440px;--main-color:#ec4d3d;--weekend-color:#f7f7f7;--current-day-color:#fef4f4;--table-cell-border-color:#e5e5e5;--odd-cell-border-color:#e5e5e5;--hour-row-color:inherit;--dark:#212121;--lightg:#9e9e9e;--card-bgcolor:#4285f4;--card-color:white;--max-hours:10;--previous-events:#c6dafc;--previous-text-color:#727d8f}.kalendar-wrapper.gstyle{--hour-row-color:#212121;--main-color:#4285f4;--weekend-color:transparent;--current-day-color:transparent;--table-cell-border-color:#e0e0e0;--odd-cell-border-color:transparent;font-family:\"Google Sans\",Roboto,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Arial,sans-serif}.kalendar-wrapper.gstyle .week-navigator{background:#fff;border-bottom:none;padding:20px;color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .week-navigator button{color:rgba(0,0,0,.54)}.kalendar-wrapper.gstyle .created-event,.kalendar-wrapper.gstyle .creating-event{background-color:var(--card-bgcolor);color:var(--card-color);text-shadow:none;border-left:none;border-radius:2px;opacity:1;border-bottom:solid 1px rgba(0,0,0,.03)}.kalendar-wrapper.gstyle .created-event>*,.kalendar-wrapper.gstyle .creating-event>*{text-shadow:none}.kalendar-wrapper.gstyle .is-past .created-event,.kalendar-wrapper.gstyle .is-past .creating-event{background-color:var(--previous-events);color:var(--previous-text-color)}.kalendar-wrapper.gstyle .created-event{width:96%}.kalendar-wrapper.gstyle .created-event .time{right:2px}.kalendar-wrapper.gstyle .sticky-top .days{margin-left:0;padding-left:55px}.kalendar-wrapper.gstyle .all-day{display:none}.kalendar-wrapper.gstyle ul.building-blocks.day-1 li.is-an-hour::before{content:\"\";position:absolute;bottom:-1px;left:-10px;width:10px;height:1px;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours,.kalendar-wrapper.gstyle ul.building-blocks li{border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .hours li{font-size:80%}.kalendar-wrapper.gstyle .hour-indicator-line>span.line{height:2px;background-color:#db4437}.kalendar-wrapper.gstyle .hour-indicator-line>span.line:before{content:\"\";width:12px;height:12px;display:block;background-color:#db4437;position:absolute;top:-1px;left:0;border-radius:100%}.kalendar-wrapper.gstyle .days{border-top:solid 1px var(--table-cell-border-color);position:relative}.kalendar-wrapper.gstyle .days:before{content:\"\";position:absolute;height:1px;width:55px;left:0;bottom:0;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator{display:flex;flex-direction:column;align-items:center;color:var(--dark);font-size:13px;padding-left:0;border-right:solid 1px var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator>div{display:flex;flex-direction:column;align-items:center}.kalendar-wrapper.gstyle .day-indicator.is-before{color:#757575}.kalendar-wrapper.gstyle .day-indicator .number-date{margin-left:0;margin-right:0;order:2;font-size:25px;font-weight:500;width:46px;height:46px;border-radius:100%;align-items:center;justify-content:center;display:flex;margin-top:4px}.kalendar-wrapper.gstyle .day-indicator.today{border-bottom-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .day-indicator.today:after{display:none}.kalendar-wrapper.gstyle .day-indicator.today .number-date{background-color:var(--main-color);color:#fff}.kalendar-wrapper.gstyle .day-indicator .letters-date{margin-left:0;margin-right:0;font-weight:500;text-transform:uppercase;font-size:11px}.kalendar-wrapper.gstyle .day-indicator:first-child{position:relative}.kalendar-wrapper.gstyle .day-indicator:first-child::before{content:\"\";position:absolute;left:-1px;top:0;width:1px;height:100%;background-color:var(--table-cell-border-color)}.kalendar-wrapper.gstyle .creating-event,.kalendar-wrapper.gstyle .popup-wrapper{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.kalendar-wrapper.non-desktop .building-blocks{pointer-events:none}.kalendar-wrapper.day-view .day-indicator{align-items:flex-start;text-align:center;padding-left:10px}.created-event,.creating-event{padding:4px 6px;cursor:default;word-break:break-word;height:100%;width:100%;font-size:14px}.created-event h4,.creating-event h4{font-weight:400}.creating-event{background-color:#34aadc;opacity:.9}.creating-event>*{text-shadow:0 0 7px rgba(0,0,0,.25)}.created-event{background-color:#bfecff;opacity:.74;border-left:solid 3px #34aadc;color:#1f6570}.week-navigator{display:flex;align-items:center;background:linear-gradient(#fdfdfd,#f9f9f9);border-bottom:solid 1px #ec4d3d;padding:10px 20px}.week-navigator .nav-wrapper{display:flex;align-items:center;justify-content:space-between;font-size:22px;width:25ch;max-width:30ch;margin:0 auto}.week-navigator .nav-wrapper span{white-space:nowrap}.week-navigator button{background:0 0;border:none;padding:0;display:inline-flex;margin:0 10px;color:#ec4d3d;align-items:center;font-size:14px;padding-bottom:5px}.kalendar-wrapper{background-color:#fff;min-width:300px}.no-scroll{overflow-y:hidden;max-height:100%}.hour-indicator-line{position:absolute;z-index:2;width:100%;height:10px;display:flex;align-items:center;pointer-events:none;user-select:none}.hour-indicator-line>span.line{background-color:var(--main-color);height:1px;display:block;flex:1}.hour-indicator-line>span.time-value{font-size:14px;width:48px;color:var(--main-color);font-weight:600;background-color:#fff}.hour-indicator-tooltip{position:absolute;z-index:0;background-color:var(--main-color);width:10px;height:10px;display:block;border-radius:100%;pointer-events:none;user-select:none}ul.kalendar-day li.kalendar-cell:last-child{display:none}.week-navigator-button{outline:0}.week-navigator-button:active svg,.week-navigator-button:hover svg{stroke:var(--main-color)}",
+    map: undefined,
+    media: undefined
+  });
+};
 /* scoped */
+
 
 var __vue_scope_id__ = undefined;
 /* module identifier */
@@ -778,8 +726,6 @@ var __vue_module_identifier__ = undefined;
 /* functional template */
 
 var __vue_is_functional_template__ = false;
-/* style inject */
-
 /* style inject SSR */
 
 /* style inject shadow dom */
@@ -787,7 +733,7 @@ var __vue_is_functional_template__ = false;
 var __vue_component__ = /*#__PURE__*/normalizeComponent({
   render: __vue_render__,
   staticRenderFns: __vue_staticRenderFns__
-}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Kalendar: __vue_component__});var install = function installKalendarVue(Vue) {
+}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, createInjector, undefined, undefined);/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Kalendar: __vue_component__});var install = function installKalendarVue(Vue) {
   if (install.installed) return;
   install.installed = true;
   Object.entries(components).forEach(function (_ref) {
@@ -1272,68 +1218,19 @@ var myWorker = {
       return newPayload;
     },
     scrollView: function scrollView() {
-      var topoffset = this.$refs.nowIndicator.offsetTop;
-      setTimeout(function () {
-        window.scroll({
-          top: topoffset,
-          left: 0,
-          behavior: "smooth"
-        });
-      }, 500);
+      if (this.passedTime) {
+        var topoffset = this.$refs.nowIndicator.offsetTop;
+        setTimeout(function () {
+          window.scroll({
+            top: topoffset,
+            left: 0,
+            behavior: "smooth"
+          });
+        }, 500);
+      }
     }
   }
-};const isOldIE = typeof navigator !== 'undefined' &&
-    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
-function createInjector(context) {
-    return (id, style) => addStyle(id, style);
-}
-let HEAD;
-const styles = {};
-function addStyle(id, css) {
-    const group = isOldIE ? css.media || 'default' : id;
-    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
-    if (!style.ids.has(id)) {
-        style.ids.add(id);
-        let code = css.source;
-        if (css.map) {
-            // https://developer.chrome.com/devtools/docs/javascript-debugging
-            // this makes source maps inside style tags work properly in Chrome
-            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
-            // http://stackoverflow.com/a/26603875
-            code +=
-                '\n/*# sourceMappingURL=data:application/json;base64,' +
-                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
-                    ' */';
-        }
-        if (!style.element) {
-            style.element = document.createElement('style');
-            style.element.type = 'text/css';
-            if (css.media)
-                style.element.setAttribute('media', css.media);
-            if (HEAD === undefined) {
-                HEAD = document.head || document.getElementsByTagName('head')[0];
-            }
-            HEAD.appendChild(style.element);
-        }
-        if ('styleSheet' in style.element) {
-            style.styles.push(code);
-            style.element.styleSheet.cssText = style.styles
-                .filter(Boolean)
-                .join('\n');
-        }
-        else {
-            const index = style.ids.size - 1;
-            const textNode = document.createTextNode(code);
-            const nodes = style.element.childNodes;
-            if (nodes[index])
-                style.element.removeChild(nodes[index]);
-            if (nodes.length)
-                style.element.insertBefore(textNode, nodes[index]);
-            else
-                style.element.appendChild(textNode);
-        }
-    }
-}/* script */
+};/* script */
 var __vue_script__$1 = script$1;
 /* template */
 
@@ -1355,7 +1252,7 @@ var __vue_render__$1 = function __vue_render__() {
     staticStyle: {
       "position": "relative"
     }
-  }, [_vm.isToday ? _c('div', {
+  }, [_vm.isToday && _vm.passedTime ? _c('div', {
     ref: "nowIndicator",
     class: _vm.kalendar_options.style === 'material_design' ? 'hour-indicator-line' : 'hour-indicator-tooltip',
     style: "top:" + _vm.passedTime + "px"
@@ -1385,7 +1282,15 @@ var __vue_render__$1 = function __vue_render__() {
         "initiatePopup": function initiatePopup($event) {
           return _vm.initiatePopup();
         }
-      }
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     });
   })], 2);
 };
@@ -1395,7 +1300,7 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-1724e754_0", {
+  inject("data-v-33f9bbe0_0", {
     source: "ul.kalendar-day{position:relative;background-color:#fff}ul.kalendar-day.is-weekend{background-color:var(--weekend-color)}ul.kalendar-day.is-today{background-color:var(--current-day-color)}ul.kalendar-day .clear{position:absolute;z-index:1;top:-20px;right:0;font-size:10px}ul.kalendar-day.creating{z-index:11}ul.kalendar-day.creating .created-event{pointer-events:none}",
     map: undefined,
     media: undefined
@@ -1644,7 +1549,7 @@ var __vue_render__$2 = function __vue_render__() {
       staticClass: "hour-row-identifier",
       style: "height:" + _vm.hourHeight + "px"
     }, [_c('span', [_vm._v(_vm._s(_vm.kalendar_options.formatLeftHours(hour.value)))])]);
-  }), 0), _vm._v(" "), _c('div', {
+  }), 0), _vm._v(" "), this.passedTime ? _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -1657,7 +1562,7 @@ var __vue_render__$2 = function __vue_render__() {
     staticClass: "time-value"
   }, [_vm._v(_vm._s(_vm.passedTime.value))]), _vm._v(" "), _c('span', {
     staticClass: "line"
-  })]), _vm._v(" "), _vm._l(_vm.days, function (day, index) {
+  })]) : _vm._e(), _vm._v(" "), _vm._l(_vm.days, function (day, index) {
     return _c('kalendar-days', {
       key: day.value.slice(0, 10),
       ref: day.value.slice(0, 10),
@@ -1666,8 +1571,16 @@ var __vue_render__$2 = function __vue_render__() {
       class: "day-" + (index + 1),
       attrs: {
         "day": day,
-        "passed-time": _vm.passedTime.distance
-      }
+        "passed-time": _vm.passedTime ? _vm.passedTime.distance : null
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     });
   })], 2)]) : _vm._e()]);
 };
@@ -1677,7 +1590,7 @@ var __vue_staticRenderFns__$2 = [];
 
 var __vue_inject_styles__$2 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-3c3b50e4_0", {
+  inject("data-v-8d468fce_0", {
     source: ".calendar-wrap{display:flex;flex-direction:column}.calendar-wrap ul{list-style:none;padding:0}.calendar-wrap ul>li{display:flex}.sticky-top{position:sticky;top:0;z-index:20;background-color:#fff}.sticky-top .days{margin:0;display:flex;margin-left:55px}.sticky-top .days li{display:inline-flex;align-items:flex-end;padding-top:10px;flex:1;font-size:1.1rem;color:#666;font-weight:300;margin-right:var(--space-between-cols);border-bottom:solid 1px #e5e5e5;padding-bottom:5px;position:relative;font-size:18px}.sticky-top .days li span{margin-right:3px}.sticky-top .days li span:first-child{font-size:20px;font-weight:500}.sticky-top .days .today{border-bottom-color:var(--main-color);color:var(--main-color)!important}.sticky-top .days .today::after{content:\"\";position:absolute;height:2px;bottom:0;left:0;width:100%;background-color:var(--main-color)}.sticky-top .all-day{display:flex;margin-bottom:0;margin-top:0;border-bottom:solid 2px #e5e5e5}.sticky-top .all-day span{display:flex;align-items:center;padding:0 5px;width:55px;font-weight:500;font-size:.8rem;color:#b8bbca;text-transform:lowercase}.sticky-top .all-day li{flex:1;margin-right:var(--space-between-cols)}.sticky-top .all-day li.all-today{background-color:#fef4f4}.dummy-row{display:flex;padding-left:55px}.dummy-row ul{display:flex;flex:1;margin:0}.dummy-row li{flex:1;height:15px;margin-right:var(--space-between-cols);border-bottom:solid 1px #e5e5e5}.blocks{display:flex;position:relative;height:100%}.blocks ul{margin-top:0}.blocks .building-blocks{flex:1;margin-right:var(--space-between-cols);margin-bottom:0;display:flex;flex-direction:column}.blocks .calendar-blocks{width:100%;display:flex;position:relative}.hours{display:flex;flex-direction:column;color:#b8bbca;font-weight:500;font-size:.85rem;width:55px;height:100%;margin-bottom:0}.hours li{color:var(--hour-row-color);border-bottom:solid 1px transparent;padding-left:8px}.hours li span{margin-top:-8px}.hours li:first-child span{visibility:hidden}",
     map: undefined,
     media: undefined
@@ -1878,7 +1791,15 @@ var __vue_render__$3 = function __vue_render__() {
         "total": _vm.cell_events.length,
         "index": eventIndex,
         "overlaps": _vm.overlapValue
-      }
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     }) : _vm._e();
   }), 1) : _vm._e();
 };
@@ -1888,7 +1809,7 @@ var __vue_staticRenderFns__$3 = [];
 
 var __vue_inject_styles__$3 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-bc1c5858_0", {
+  inject("data-v-2044d53b_0", {
     source: "li{font-size:13px;position:relative}.created-events{height:100%}ul.building-blocks li{z-index:0;border-bottom:dotted 1px var(--odd-cell-border-color)}ul.building-blocks li.first_of_appointment{z-index:1;opacity:1}ul.building-blocks li.is-an-hour{border-bottom:solid 1px var(--table-cell-border-color)}ul.building-blocks li.has-events{z-index:unset}ul.building-blocks li.being-created{z-index:11}",
     map: undefined,
     media: undefined
@@ -1919,8 +1840,17 @@ var script$4 = {
   data: function data() {
     return {
       inspecting: false,
-      editing: false
+      editing: false,
+      new_appointment: {}
     };
+  },
+  methods: {
+    addAppointment: function addAppointment(information) {
+      window.calendarEventBus.$emit('addAppointmentEvent', information);
+    },
+    closePopups: function closePopups() {
+      window.calendarEventBus.$emit('closePopupsEvent');
+    }
   },
   computed: {
     eventCardClasses: function eventCardClasses() {
@@ -2012,27 +1942,103 @@ var __vue_render__$4 = function __vue_render__() {
         _vm.inspecting = false;
       }
     }
-  }, [_vm.status === 'creating' || _vm.status === 'popup-initiated' ? _c('portal-target', {
-    attrs: {
-      "slot-props": _vm.information,
-      "name": "event-creation",
-      "slim": ""
+  }, [_vm.status === 'creating' || _vm.status === 'popup-initiated' ? [_c('div', {
+    staticClass: "creating-event"
+  }, [_vm._t("creating-card", [_c('h4', {
+    staticClass: "appointment-title",
+    staticStyle: {
+      "text-align": "left"
     }
-  }) : _c('portal-target', {
-    attrs: {
-      "name": "event-details",
-      "slot-props": _vm.information,
-      "slim": ""
+  }, [_vm._v("New Appointment 1")]), _vm._v(" "), _c('span', {
+    staticClass: "time"
+  }, [_vm._v(_vm._s(new Date(_vm.information.start_time).toLocaleTimeString().substring(0, 5)) + " - " + _vm._s(new Date(_vm.information.end_time).toLocaleTimeString().substring(0, 5)))])], {
+    "event_information": _vm.information
+  })], 2)] : [_c('div', {
+    staticClass: "created-event"
+  }, [_vm._t("created-card", [_c('h4', {
+    staticStyle: {
+      "margin-bottom": "5px"
     }
-  }), _vm._v(" "), _vm.status === 'popup-initiated' ? _c('div', {
+  }, [_vm._v(_vm._s(_vm.information.data) + " XY")]), _vm._v(" "), _c('p', [_vm._v("\n                    " + _vm._s(_vm.information.start_time.substr(11, 5)) + " -\n                    " + _vm._s(_vm.information.end_time.substr(11, 5)) + "\n                ")])], {
+    "event_information": _vm.information
+  })], 2)], _vm._v(" "), _vm.status === 'popup-initiated' ? _c('div', {
     staticClass: "popup-wrapper"
-  }, [_c('portal-target', {
-    attrs: {
-      "name": "event-popup-form",
-      "slim": "",
-      "slot-props": _vm.information
+  }, [_c('div', {
+    staticClass: "popup-event"
+  }, [_vm._t("event-popup-form", [_c('h4', {
+    staticStyle: {
+      "margin-bottom": "10px"
     }
-  })], 1) : _vm._e()], 1);
+  }, [_vm._v("New Appointment")]), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.new_appointment['title'],
+      expression: "new_appointment['title']"
+    }],
+    staticStyle: {
+      "width": "100%"
+    },
+    attrs: {
+      "type": "text",
+      "name": "title",
+      "placeholder": "Title"
+    },
+    domProps: {
+      "value": _vm.new_appointment['title']
+    },
+    on: {
+      "input": function input($event) {
+        if ($event.target.composing) {
+          return;
+        }
+
+        _vm.$set(_vm.new_appointment, 'title', $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _c('textarea', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.new_appointment['description'],
+      expression: "new_appointment['description']"
+    }],
+    attrs: {
+      "type": "text",
+      "name": "description",
+      "placeholder": "Description",
+      "rows": "2"
+    },
+    domProps: {
+      "value": _vm.new_appointment['description']
+    },
+    on: {
+      "input": function input($event) {
+        if ($event.target.composing) {
+          return;
+        }
+
+        _vm.$set(_vm.new_appointment, 'description', $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _c('div', {
+    staticClass: "buttons"
+  }, [_c('button', {
+    staticClass: "cancel",
+    on: {
+      "click": function click($event) {
+        return _vm.closePopups();
+      }
+    }
+  }, [_vm._v("Cancel")]), _vm._v(" "), _c('button', {
+    on: {
+      "click": function click($event) {
+        return _vm.addAppointment(_vm.information);
+      }
+    }
+  }, [_vm._v("Save")])])], {
+    "popup_information": _vm.information
+  })], 2)]) : _vm._e()], 2);
 };
 
 var __vue_staticRenderFns__$4 = [];
@@ -2040,7 +2046,7 @@ var __vue_staticRenderFns__$4 = [];
 
 var __vue_inject_styles__$4 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-62a3fbcc_0", {
+  inject("data-v-07dae51b_0", {
     source: ".event-card{display:flex;flex-direction:column;height:100%;width:100%;position:absolute;pointer-events:none;top:0;left:0;right:0;bottom:0;color:#fff;user-select:none;will-change:height}.event-card h4,.event-card p,.event-card span{margin:0}.event-card>*{flex:1;position:relative}.event-card.creating{z-index:-1}.event-card.overlaps>*{border:solid 1px #fff!important}.event-card.inspecting{z-index:11!important}.event-card.inspecting .created-event{box-shadow:0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12),0 3px 5px -1px rgba(0,0,0,.2);transition:opacity .1s linear}.event-card__mini .created-event>.details-card>*{display:none}.event-card__mini .appointment-title,.event-card__mini .time{display:block!important;position:absolute;top:0;font-size:9px;z-index:1;overflow:visible;height:100%}.event-card__small .appointment-title{font-size:80%}.event-card__small .time{font-size:70%}.event-card.two-in-one .details-card>*{font-size:60%}.event-card h1,.event-card h2,.event-card h3,.event-card h4,.event-card h5,.event-card h6,.event-card p{margin:0}.time{position:absolute;bottom:0;right:0;font-size:11px}.popup-wrapper{text-shadow:none;color:#000;z-index:10;position:absolute;top:0;left:calc(100% + 5px);display:flex;flex-direction:column;pointer-events:all;user-select:none;background-color:#fff;border:solid 1px rgba(0,0,0,.08);border-radius:4px;box-shadow:0 2px 12px -3px rgba(0,0,0,.3);padding:10px}.popup-wrapper h4{color:#000;font-weight:400}.popup-wrapper input,.popup-wrapper textarea{border:none;background-color:#ebebeb;color:#030303;border-radius:4px;padding:5px 8px;margin-bottom:5px}.created-event{pointer-events:all;position:relative}.created-event>.details-card{max-width:100%;width:100%;overflow:hidden;position:relative;white-space:nowrap;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}.created-event>.details-card h2,.created-event>.details-card h3,.created-event>.details-card h4,.created-event>.details-card p,.created-event>.details-card small,.created-event>.details-card span,.created-event>.details-card strong,.created-event>.details-card>h1{text-overflow:ellipsis;overflow:hidden;display:block}ul:last-child .popup-wrapper{left:auto;right:100%;margin-right:10px}.day-view ul .popup-wrapper{left:auto;right:auto;width:calc(100% - 10px);top:10px}",
     map: undefined,
     media: undefined

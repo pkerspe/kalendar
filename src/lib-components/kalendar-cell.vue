@@ -26,7 +26,12 @@
             :total="cell_events.length"
             :index="eventIndex"
             :overlaps="overlapValue"
-        />
+        >
+            <!-- inherit slots to child component -->
+            <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+                <slot :name="slot" v-bind="scope"/>
+            </template>
+        </KalendarEvent>
     </li>
 </template>
 <script>

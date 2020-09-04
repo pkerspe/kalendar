@@ -1,4 +1,5 @@
-import { i as isWeekend, a as isToday, g as getLocaleTime, b as _objectSpread2, c as cloneObject, d as __vue_normalize__, e as isBefore, f as getHourlessDate, h as addTimezoneInfo } from './index-1d9e2343.js';
+import { i as isWeekend, a as isToday, g as getLocaleTime, b as _objectSpread2, c as cloneObject, d as __vue_normalize__, e as __vue_create_injector__, f as isBefore, h as getHourlessDate, j as addTimezoneInfo } from './index-da5b199b.js';
+import 'vue';
 
 function PromiseWorker (worker) {
   var messageIds = 0;
@@ -123,7 +124,7 @@ var script = {
   },
   components: {
     kalendarCell: function kalendarCell() {
-      return import('./kalendar-cell-c698071a.js');
+      return import('./kalendar-cell-4a51e014.js');
     }
   },
   provide: function provide() {
@@ -461,70 +462,19 @@ var script = {
       return newPayload;
     },
     scrollView: function scrollView() {
-      var topoffset = this.$refs.nowIndicator.offsetTop;
-      setTimeout(function () {
-        window.scroll({
-          top: topoffset,
-          left: 0,
-          behavior: "smooth"
-        });
-      }, 500);
+      if (this.passedTime) {
+        var topoffset = this.$refs.nowIndicator.offsetTop;
+        setTimeout(function () {
+          window.scroll({
+            top: topoffset,
+            left: 0,
+            behavior: "smooth"
+          });
+        }, 500);
+      }
     }
   }
 };
-
-const isOldIE = typeof navigator !== 'undefined' &&
-    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
-function createInjector(context) {
-    return (id, style) => addStyle(id, style);
-}
-let HEAD;
-const styles = {};
-function addStyle(id, css) {
-    const group = isOldIE ? css.media || 'default' : id;
-    const style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
-    if (!style.ids.has(id)) {
-        style.ids.add(id);
-        let code = css.source;
-        if (css.map) {
-            // https://developer.chrome.com/devtools/docs/javascript-debugging
-            // this makes source maps inside style tags work properly in Chrome
-            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
-            // http://stackoverflow.com/a/26603875
-            code +=
-                '\n/*# sourceMappingURL=data:application/json;base64,' +
-                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
-                    ' */';
-        }
-        if (!style.element) {
-            style.element = document.createElement('style');
-            style.element.type = 'text/css';
-            if (css.media)
-                style.element.setAttribute('media', css.media);
-            if (HEAD === undefined) {
-                HEAD = document.head || document.getElementsByTagName('head')[0];
-            }
-            HEAD.appendChild(style.element);
-        }
-        if ('styleSheet' in style.element) {
-            style.styles.push(code);
-            style.element.styleSheet.cssText = style.styles
-                .filter(Boolean)
-                .join('\n');
-        }
-        else {
-            const index = style.ids.size - 1;
-            const textNode = document.createTextNode(code);
-            const nodes = style.element.childNodes;
-            if (nodes[index])
-                style.element.removeChild(nodes[index]);
-            if (nodes.length)
-                style.element.insertBefore(textNode, nodes[index]);
-            else
-                style.element.appendChild(textNode);
-        }
-    }
-}
 
 /* script */
 var __vue_script__ = script;
@@ -548,7 +498,7 @@ var __vue_render__ = function __vue_render__() {
     staticStyle: {
       "position": "relative"
     }
-  }, [_vm.isToday ? _c('div', {
+  }, [_vm.isToday && _vm.passedTime ? _c('div', {
     ref: "nowIndicator",
     class: _vm.kalendar_options.style === 'material_design' ? 'hour-indicator-line' : 'hour-indicator-tooltip',
     style: "top:" + _vm.passedTime + "px"
@@ -578,7 +528,15 @@ var __vue_render__ = function __vue_render__() {
         "initiatePopup": function initiatePopup($event) {
           return _vm.initiatePopup();
         }
-      }
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     });
   })], 2);
 };
@@ -588,7 +546,7 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-1724e754_0", {
+  inject("data-v-33f9bbe0_0", {
     source: "ul.kalendar-day{position:relative;background-color:#fff}ul.kalendar-day.is-weekend{background-color:var(--weekend-color)}ul.kalendar-day.is-today{background-color:var(--current-day-color)}ul.kalendar-day .clear{position:absolute;z-index:1;top:-20px;right:0;font-size:10px}ul.kalendar-day.creating{z-index:11}ul.kalendar-day.creating .created-event{pointer-events:none}",
     map: undefined,
     media: undefined
@@ -611,7 +569,7 @@ var __vue_is_functional_template__ = false;
 var __vue_component__ = /*#__PURE__*/__vue_normalize__({
   render: __vue_render__,
   staticRenderFns: __vue_staticRenderFns__
-}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, createInjector, undefined, undefined);
+}, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, __vue_create_injector__, undefined, undefined);
 
 //
 var script$1 = {
@@ -841,7 +799,7 @@ var __vue_render__$1 = function __vue_render__() {
       staticClass: "hour-row-identifier",
       style: "height:" + _vm.hourHeight + "px"
     }, [_c('span', [_vm._v(_vm._s(_vm.kalendar_options.formatLeftHours(hour.value)))])]);
-  }), 0), _vm._v(" "), _c('div', {
+  }), 0), _vm._v(" "), this.passedTime ? _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -854,7 +812,7 @@ var __vue_render__$1 = function __vue_render__() {
     staticClass: "time-value"
   }, [_vm._v(_vm._s(_vm.passedTime.value))]), _vm._v(" "), _c('span', {
     staticClass: "line"
-  })]), _vm._v(" "), _vm._l(_vm.days, function (day, index) {
+  })]) : _vm._e(), _vm._v(" "), _vm._l(_vm.days, function (day, index) {
     return _c('kalendar-days', {
       key: day.value.slice(0, 10),
       ref: day.value.slice(0, 10),
@@ -863,8 +821,16 @@ var __vue_render__$1 = function __vue_render__() {
       class: "day-" + (index + 1),
       attrs: {
         "day": day,
-        "passed-time": _vm.passedTime.distance
-      }
+        "passed-time": _vm.passedTime ? _vm.passedTime.distance : null
+      },
+      scopedSlots: _vm._u([_vm._l(_vm.$scopedSlots, function (_, slot) {
+        return {
+          key: slot,
+          fn: function fn(scope) {
+            return [_vm._t(slot, null, null, scope)];
+          }
+        };
+      })], null, true)
     });
   })], 2)]) : _vm._e()]);
 };
@@ -874,7 +840,7 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-3c3b50e4_0", {
+  inject("data-v-8d468fce_0", {
     source: ".calendar-wrap{display:flex;flex-direction:column}.calendar-wrap ul{list-style:none;padding:0}.calendar-wrap ul>li{display:flex}.sticky-top{position:sticky;top:0;z-index:20;background-color:#fff}.sticky-top .days{margin:0;display:flex;margin-left:55px}.sticky-top .days li{display:inline-flex;align-items:flex-end;padding-top:10px;flex:1;font-size:1.1rem;color:#666;font-weight:300;margin-right:var(--space-between-cols);border-bottom:solid 1px #e5e5e5;padding-bottom:5px;position:relative;font-size:18px}.sticky-top .days li span{margin-right:3px}.sticky-top .days li span:first-child{font-size:20px;font-weight:500}.sticky-top .days .today{border-bottom-color:var(--main-color);color:var(--main-color)!important}.sticky-top .days .today::after{content:\"\";position:absolute;height:2px;bottom:0;left:0;width:100%;background-color:var(--main-color)}.sticky-top .all-day{display:flex;margin-bottom:0;margin-top:0;border-bottom:solid 2px #e5e5e5}.sticky-top .all-day span{display:flex;align-items:center;padding:0 5px;width:55px;font-weight:500;font-size:.8rem;color:#b8bbca;text-transform:lowercase}.sticky-top .all-day li{flex:1;margin-right:var(--space-between-cols)}.sticky-top .all-day li.all-today{background-color:#fef4f4}.dummy-row{display:flex;padding-left:55px}.dummy-row ul{display:flex;flex:1;margin:0}.dummy-row li{flex:1;height:15px;margin-right:var(--space-between-cols);border-bottom:solid 1px #e5e5e5}.blocks{display:flex;position:relative;height:100%}.blocks ul{margin-top:0}.blocks .building-blocks{flex:1;margin-right:var(--space-between-cols);margin-bottom:0;display:flex;flex-direction:column}.blocks .calendar-blocks{width:100%;display:flex;position:relative}.hours{display:flex;flex-direction:column;color:#b8bbca;font-weight:500;font-size:.85rem;width:55px;height:100%;margin-bottom:0}.hours li{color:var(--hour-row-color);border-bottom:solid 1px transparent;padding-left:8px}.hours li span{margin-top:-8px}.hours li:first-child span{visibility:hidden}",
     map: undefined,
     media: undefined
@@ -897,6 +863,6 @@ var __vue_is_functional_template__$1 = false;
 var __vue_component__$1 = /*#__PURE__*/__vue_normalize__({
   render: __vue_render__$1,
   staticRenderFns: __vue_staticRenderFns__$1
-}, __vue_inject_styles__$1, __vue_script__$1, __vue_scope_id__$1, __vue_is_functional_template__$1, __vue_module_identifier__$1, false, createInjector, undefined, undefined);
+}, __vue_inject_styles__$1, __vue_script__$1, __vue_scope_id__$1, __vue_is_functional_template__$1, __vue_module_identifier__$1, false, __vue_create_injector__, undefined, undefined);
 
-export { __vue_component__$1 as _, createInjector as a };
+export default __vue_component__$1;
