@@ -81,44 +81,6 @@
                 <slot :name="slot" v-bind="scope"/>
             </template>
         </kalendar-week-view>
-<!--
-        <portal to="event-popup-form" class="slotable">
-            <div slot-scope="information" class="popup-event">
-                <slot name="popup-form" :popup_information="information">
-                    <h4 style="margin-bottom: 10px">New Appointment 2</h4>
-                    <input
-                            v-model="new_appointment['title']"
-                            type="text"
-                            name="title"
-                            placeholder="Title"
-                            style="width: 100%;"
-                    />
-                    <textarea v-model="new_appointment['description']"
-                              type="text"
-                              name="description"
-                              placeholder="Description"
-                              rows="2"
-                    ></textarea>
-                    <div class="buttons">
-                        <button class="cancel" @click="closePopups()">Cancel</button>
-                        <button @click="addAppointment(information)">Save</button>
-                    </div>
-                </slot>
-            </div>
-        </portal>-->
-<!--
-        <portal to="event-details" class="slotable">
-            <div slot-scope="information" class="created-event">
-                <slot name="created-card" :event_information="information">
-                    <h4 style="margin-bottom: 5px">{{ information.data }} XY</h4>
-                    <p>
-                        {{ information.start_time.substr(11, 5) }} -
-                        {{ information.end_time.substr(11, 5) }}
-                    </p>
-                </slot>
-            </div>
-        </portal>
-        -->
     </div>
 </template>
 <script>

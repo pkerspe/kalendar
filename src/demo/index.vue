@@ -430,9 +430,4 @@ body {
         margin-left: auto;
     }
 }
-
-.show-slots .vue-portal-target {
-    outline: dashed 1px red;
-    outline-offset: -1px;
-}
 </style>
