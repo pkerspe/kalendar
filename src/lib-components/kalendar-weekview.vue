@@ -1,6 +1,6 @@
 <template>
   <div class="calendar-wrap" :style="`--space-between-cols: ${colsSpace}`">
-    <div class="sticky-top">
+    <div class="stickyCalendarHead">
       <ul class="days">
         <li
           class="day-indicator"
@@ -226,7 +226,7 @@ export default {
   }
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 $blue: #5fb3f2;
 $lblue: #d6eefc;
 $dblue: #3d79b4;
@@ -248,82 +248,83 @@ $theme-color: #e5e5e5;
       display: flex;
     }
   }
-}
 
-.sticky-top {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background-color: white;
 
-  .days {
-    margin: 0px;
-    display: flex;
-    margin-left: 55px;
+  .stickyCalendarHead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: white;
 
-    li {
-      display: inline-flex;
-      align-items: flex-end;
-      padding-top: 10px;
-      flex: 1;
-      font-size: 1.1rem;
-      color: $a-grey;
-      font-weight: 300;
-      margin-right: var(--space-between-cols);
-      border-bottom: solid 1px #e5e5e5;
-      padding-bottom: 5px;
-      position: relative;
-      font-size: 18px;
+    .days {
+      margin: 0px;
+      display: flex;
+      margin-left: 55px;
+
+      li {
+        display: inline-flex;
+        align-items: flex-end;
+        padding-top: 10px;
+        flex: 1;
+        font-size: 1.1rem;
+        color: $a-grey;
+        font-weight: 300;
+        margin-right: var(--space-between-cols);
+        border-bottom: solid 1px #e5e5e5;
+        padding-bottom: 5px;
+        position: relative;
+        font-size: 18px;
+
+        span {
+          margin-right: 3px;
+        }
+
+        span:first-child {
+          font-size: 20px;
+          font-weight: 500;
+        }
+      }
+
+      .today {
+        border-bottom-color: var(--main-color);
+        color: var(--main-color) !important;
+      }
+
+      .today::after {
+        content: "";
+        position: absolute;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--main-color);
+      }
+    }
+
+    .all-day {
+      display: flex;
+      margin-bottom: 0px; //border-top: solid 1px #e5e5e5;
+      margin-top: 0px;
+      border-bottom: solid 2px #e5e5e5;
 
       span {
-        margin-right: 3px;
-      }
-
-      span:first-child {
-        font-size: 20px;
+        display: flex;
+        align-items: center;
+        padding: 0px 5px;
+        width: 55px;
         font-weight: 500;
+        font-size: 0.8rem;
+        color: darken($grey, 5);
+        text-transform: lowercase;
       }
-    }
 
-    .today {
-      border-bottom-color: var(--main-color);
-      color: var(--main-color) !important;
-    }
+      li {
+        flex: 1; //border-right: solid 5px $border-color;
+        margin-right: var(--space-between-cols);
 
-    .today::after {
-      content: "";
-      position: absolute;
-      height: 2px;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: var(--main-color);
-    }
-  }
-
-  .all-day {
-    display: flex;
-    margin-bottom: 0px; //border-top: solid 1px #e5e5e5;
-    margin-top: 0px;
-    border-bottom: solid 2px #e5e5e5;
-
-    span {
-      display: flex;
-      align-items: center;
-      padding: 0px 5px;
-      width: 55px;
-      font-weight: 500;
-      font-size: 0.8rem;
-      color: darken($grey, 5);
-      text-transform: lowercase;
-    }
-
-    li {
-      flex: 1; //border-right: solid 5px $border-color;
-      margin-right: var(--space-between-cols);
-
-      &.all-today {
-        background-color: #fef4f4;
+        &.all-today {
+          background-color: #fef4f4;
+        }
       }
     }
   }
