@@ -17,8 +17,8 @@
         <template v-if="status === 'creating' || status === 'popup-initiated'">
             <div class="creating-event">
                 <slot name="creating-card" v-bind:event_information="information">
-                    <h4 class="appointment-title" style="text-align: left;">New Appointment 1</h4>
-                    <span class="time">{{ new Date(information.start_time).toLocaleTimeString().substring(0,5) }} - {{ new Date(information.end_time).toLocaleTimeString().substring(0,5) }}</span>
+                    <h4 class="appointment-title" style="text-align: left;">New Appointment</h4>
+                    <span class="time">{{ information.start_time | formatTime }} - {{ information.end_time | formatTime }}</span>
                 </slot>
             </div>
         </template>
@@ -28,8 +28,8 @@
                 <slot name="created-card" v-bind:event_information="information">
                     <h4 style="margin-bottom: 5px">{{ information.data }} XY</h4>
                     <p>
-                        {{ information.start_time.substr(11, 5) }} -
-                        {{ information.end_time.substr(11, 5) }}
+                        {{ information.start_time | formatTime }} -
+                        {{ information.end_time | formatTime }}
                     </p>
                 </slot>
             </div>
@@ -62,7 +62,7 @@
     </div>
 </template>
 <script>
-    import {isBefore, getLocaleTime, addTimezoneInfo} from './utils.js';
+    import {isBefore, getLocaleTime, addTimezoneInfo, getTime} from './utils.js';
 
     export default {
         props: ['event', 'total', 'index', 'overlaps'],
@@ -74,6 +74,11 @@
             editing: false,
             new_appointment: {},
         }),
+        filters: {
+            formatTime: function(date){
+                return getTime(date);
+            }
+        },
         methods: {
             addAppointment: function(information){
                 window.calendarEventBus.$emit('addAppointmentEvent', information);
