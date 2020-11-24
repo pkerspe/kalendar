@@ -201,7 +201,6 @@ const constructNewEvent = function (event, day, day_options) {
 
     let eventKey = masked_from.toISOString();
 
-
     let dayBegin = new Date(day);
     let dayEnd = new Date(day);
     dayEnd.setHours(23, 59, 59);

@@ -185,9 +185,6 @@
                         }
                     })
                     .then(constructed_events => {
-                        if(Object.keys(constructed_events).length > 0) {
-                            console.debug("Events for current day " + this.day.value, constructed_events);
-                        }
                         this.day_events = constructed_events;
                     });
             },
